@@ -1,0 +1,8 @@
+The Concept – What is an API and how does the Scout use it? 🔌
+An API (Application Programming Interface) is like a waiter in a restaurant.
+You (The Scout Agent) are the customer.
+The Weather/Mandi Server is the kitchen.
+The API is the waiter. You give the waiter your order (e.g., "Give me the weather for Mumbai"), they run to the kitchen, and bring back a plate of raw data (usually in a format called JSON).
+Our Scout Agent has two main responsibilities:
+Talk to the Open-Meteo API: A free, public weather API that doesn't require any secret keys. We give it coordinates (Latitude & Longitude), and it returns current temperature and rainfall data.
+Fetch Mandi Prices: Since live government portals (Agmarknet) can be highly unstable or require complex credentials, we will design a robust local price engine inside the Scout. It will simulate real-world potato/onion prices across three different local Mandis (Mandi A, Mandi B, Mandi C) with slight variations to feed our Predictor and Planner agents.
