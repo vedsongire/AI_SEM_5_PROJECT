@@ -176,104 +176,25 @@ class ScoutAgent:
     def fetch_live_mandi_prices(
         self, state: str, commodity: str, timeout: int = 5
     ) -> List[Dict[str, Any]]:
-        """Query official Indian Government API for live mandi (market) prices.
+        """Query local Mandi database records for mandi (market) prices.
 
-        Passes api-key, format=json, limit=100 (without server-side text filters).
-        Uses a 5s connection timeout and filters records locally. If the API times out, fails,
-        or has no matches, activates local historical fallback engine.
+        Parses local CSV datasets dynamically per Rule 1.
 
         Args:
             state: Target state name (e.g., 'Uttar Pradesh').
             commodity: Target commodity name (e.g., 'Wheat').
-            timeout: Request timeout in seconds. Defaults to 5.
+            timeout: Deprecated parameter kept for backwards compatibility.
 
         Returns:
-            List of dictionaries representing active mandis with price details (up to 5 records).
+            List of dictionaries representing active mandis with price details.
         """
-        params = {
-            "api-key": self.gov_api_key,
-            "format": "json",
-            "limit": 100,
-        }
-
-        try:
-            print(
-                f"Connecting to live Mandi API for '{state}' - '{commodity}' (timeout={timeout}s)..."
-            )
-            response = requests.get(
-                self.DATA_GOV_MANDI_ENDPOINT, params=params, timeout=timeout
-            )
-            response.raise_for_status()
-            data = response.json()
-
-            raw_records = data.get("records", [])
-            if not isinstance(raw_records, list):
-                raw_records = []
-
-            target_state = state.strip().lower()
-            target_commodity = commodity.strip().lower()
-            matched_records: List[Dict[str, Any]] = []
-
-            for record in raw_records:
-                rec_state = (
-                    str(self._get_field_value(record, "state") or "").strip().lower()
-                )
-                rec_commodity = (
-                    str(self._get_field_value(record, "commodity") or "")
-                    .strip()
-                    .lower()
-                )
-
-                state_matches = target_state in rec_state or rec_state in target_state
-                commodity_matches = target_commodity in rec_commodity or rec_commodity in target_commodity
-
-                if state_matches and commodity_matches:
-                    market = self._get_field_value(record, "market") or "N/A"
-                    district = self._get_field_value(record, "district") or "N/A"
-                    variety = self._get_field_value(record, "variety") or "N/A"
-                    arrival_date = self._get_field_value(record, "arrival_date") or "N/A"
-                    min_price = self._safe_int(self._get_field_value(record, "min_price"))
-                    max_price = self._safe_int(self._get_field_value(record, "max_price"))
-                    modal_price = self._safe_int(
-                        self._get_field_value(record, "modal_price")
-                    )
-                    st_val = self._get_field_value(record, "state") or state
-                    cm_val = self._get_field_value(record, "commodity") or commodity
-
-                    matched_records.append(
-                        {
-                            "market_name": market,
-                            "state": st_val,
-                            "district": district,
-                            "commodity": cm_val,
-                            "variety": variety,
-                            "arrival_date": arrival_date,
-                            "min_price": min_price,
-                            "max_price": max_price,
-                            "modal_price": modal_price,
-                        }
-                    )
-                    if len(matched_records) >= 5:
-                        break
-
-            if not matched_records:
-                print(
-                    f"[WARNING] Live Mandi API returned 0 matches for '{state}' - '{commodity}'. Activating local fallback engine..."
-                )
-                return self._load_csv_fallback(state, commodity)
-
-            return matched_records
-
-        except Exception:
-            print(
-                f"[WARNING] Live Mandi API unreachable/timed out. Activating local fallback engine for '{state}'..."
-            )
-            return self._load_csv_fallback(state, commodity)
+        print(f"[DATA ENGINE] Ingesting dynamic local market prices for '{state}' - '{commodity}'...")
+        return self._load_csv_fallback(state, commodity)
 
     def _load_csv_fallback(self, state: str, commodity: str) -> List[Dict[str, Any]]:
-        """Load historical fallback mandi price records from local CSV files in data/ directory.
+        """Load mandi price records from local CSV files in data/ directory and subdirectories.
 
-        Locates all .csv files in data/ relative to project root,
+        Locates all .csv files in data/ (including data_vegetable_wise/) relative to project root,
         dynamically handles raw government headers case-insensitively, and returns
         matched records with prices cast as integers.
 
@@ -287,7 +208,7 @@ class ScoutAgent:
         project_root = Path(__file__).resolve().parent.parent.parent
         data_dir = project_root / "data"
 
-        csv_files = list(data_dir.glob("*.csv")) if data_dir.exists() else []
+        csv_files = list(data_dir.rglob("*.csv")) if data_dir.exists() else []
         if not csv_files:
             raise FileNotFoundError(f"Fallback CSV dataset directory not found or empty at '{data_dir}'.")
 

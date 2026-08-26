@@ -111,6 +111,63 @@ def test_real_multi_agent_pipeline_haryana():
     print(f"[OK] Haryana Pipeline Test Passed! Nearest: {candidates[0]['market_name']} ({candidates[0]['haversine_distance_km']} km)")
 
 
+def test_real_multi_agent_pipeline_indore_mp():
+    """Verify backend multi-agent execution for Indore, MP farmer selling 60 quintals Wheat."""
+    scout = ScoutAgent()
+    predictor = PredictorAgent()
+    planner = PlannerAgent()
+
+    loc_query = "Indore, Madhya Pradesh"
+    commodity = "Wheat"
+    quantity_quintals = 60.0
+
+    print(f"\n--- Running Backend Pipeline for {loc_query} ({quantity_quintals} qt {commodity}) ---")
+    loc_info = planner.geocode_farmer_location(loc_query)
+    lat, lon = loc_info["latitude"], loc_info["longitude"]
+    state = loc_info["state"]
+
+    weather = scout.fetch_weather(latitude=lat, longitude=lon)
+    mandi_records = scout.fetch_live_mandi_prices(state=state, commodity=commodity)
+    candidate_markets = planner.discover_candidate_markets(
+        farmer_lat=lat, farmer_lon=lon, state=state, active_mandi_records=mandi_records, commodity=commodity
+    )
+
+    market_predictions = {}
+    for cm in candidate_markets:
+        m_name = cm["market_name"]
+        mandi_rec = {
+            "state": state,
+            "district": cm.get("district", state),
+            "market_name": m_name,
+            "commodity": commodity,
+            "variety": "Local",
+            "arrival_date": "26/08/2026",
+            "modal_price": cm.get("modal_price", 2400),
+        }
+        preds = predictor.predict_quantile_prices(
+            mandi_record=mandi_rec, weather_data=weather, ndvi_data={"ndvi": 0.65}
+        )
+        market_predictions[m_name] = preds
+
+    recs = planner.optimize_logistics(
+        farmer_lat=lat,
+        farmer_lon=lon,
+        predictions_by_market=market_predictions,
+        quantity_quintals=quantity_quintals,
+        state=state,
+        target_markets=candidate_markets,
+    )
+
+    assert len(recs) >= 1
+    winner = recs[0]
+    print(f"[OK] Indore MP Pipeline Test Passed!")
+    print(f"     [WINNER] Best Mandi: {winner['market_name']} ({winner['one_way_distance_km']:.1f} km)")
+    print(f"     [VEHICLE] Assigned: {winner['vehicle_assigned']}")
+    print(f"     [PROFIT] Net Expected Profit: Rs. {winner['net_expected_profit_inr']:,.2f}")
+
+
 if __name__ == "__main__":
+    test_real_multi_agent_pipeline_indore_mp()
     test_real_multi_agent_pipeline_up()
     test_real_multi_agent_pipeline_haryana()
+

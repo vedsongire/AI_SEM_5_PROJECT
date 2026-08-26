@@ -6,3 +6,5 @@ geopy
 beautifulsoup4
 scikit-learn
 joblib
+SpeechRecognition
+gTTS
