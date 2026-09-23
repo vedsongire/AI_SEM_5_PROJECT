@@ -48,50 +48,6 @@
 
 ---
 
-## 🎙️ How to Explain This Project in an Interview (The Master Pitch)
-
-> [!TIP]
-> **Use this section as your quick reference guide during technical interviews.** It provides concise answers to the most common questions an interviewer or panel will ask.
-
-### 1. The 60-Second Elevator Pitch
-> *"In India, smallholder farmers often suffer a 30% to 70% price haircut because they sell their produce to local middlemen in distress, unaware that a terminal APMC market 250 km away is paying twice as much. Even if they know the distant price, they don't know if the extra revenue covers truck rental, diesel, and tolls.*
->
-> *To solve this, I built **K.I.S.A.N. AI**—a cooperative multi-agent platform. It doesn't just predict crop prices; it solves **spatial arbitrage**. It coordinates four specialized agents:*
-> 1. *A **Scout Agent** that pulls real-time weather and local mandi data across 325+ crops;*
-> 2. *A **Predictor Agent** that forecasts price uncertainty bands ($p_{10}, p_{50}, p_{90}$) using Multi-Quantile Gradient Boosting;*
-> 3. *A **Planner Agent** that scrapes live state diesel prices, computes true driving distance via Project OSRM, sizes freight trucks, and outputs exact **Net Pocket Profit**;*
-> 4. *A **Voice Agent** that communicates in vernacular Hindi or English over regular phone calls (IVR) or WhatsApp voice notes.*
->
-> *On benchmark testing with 80 quintals of onion from Jalna, it identified an extra net profit of **₹84,949 (+47.2%)** over a local haat sale after deducting all logistics expenses."*
-
-### 2. Four Technical Pillars to Highlight
-| Pillar | What You Built | Why It Impresses Interviewers |
-| :--- | :--- | :--- |
-| **System Design** | Cooperative Multi-Agent Architecture (Scout $\rightarrow$ Predictor $\rightarrow$ Planner $\rightarrow$ Voice) | Loose coupling, single-responsibility principle, domain-specific agent contracts. |
-| **Machine Learning** | 9-Feature Multi-Quantile Gradient Boosting Regressor with Pinball Loss | Provides uncertainty quantification ($p_{10}, p_{50}, p_{90}$) with **79.46% PICP** vs point-prediction black boxes. |
-| **Real-World Operations** | Project OSRM Highway Routing + GoodReturns Live Diesel Scraping + Dynamic Vehicle Allocation | Replaces naive straight-line Euclidean distance with true roadway kilometers, tolls, and ton-mile fuel models. |
-| **Zero-Hardcoding Mandate** | Dynamic Open-Meteo Climatology + 325 Local CSV Parsing + Nominatim Geocoding | Strict engineering rule: 0 static mock data, resilient multi-tier fallback hierarchy with offline caches. |
-
-### 3. Top 3 Interview "Trap" Questions & How to Answer
-
-#### Q: "Why use Multi-Quantile GBR instead of an LSTM or Transformer?"
-> **Your Answer**:
-> *"Agricultural mandi transactions are tabular, cross-sectional, and irregularly sampled across hundreds of markets. Tree-based Gradient Boosted Trees consistently outperform deep sequential networks on tabular data without requiring massive training regimes. More importantly, using the asymmetric **Pinball Loss function** allows us to directly model the **$p_{10}$ downside floor** (conservative risk for small farmers) and **$p_{90}$ upside ceiling** in sub-5 millisecond CPU inference time, making it deployable on edge servers with zero GPU overhead."*
-
-#### Q: "Why a Multi-Agent architecture rather than a single LLM prompt?"
-> **Your Answer**:
-> *"A generative LLM hallucinating a crop price or highway toll could bankrupt a farmer. Agricultural logistics requires deterministic mathematical operations: OSRM route solving, vehicle payload matching, pinball loss evaluation, and currency arithmetic. We reserve conversational AI strictly for the Voice/NLU layer, while deterministic agents (Scout, Predictor, Planner) handle data ingestion, machine learning, and logistics optimization."*
-
-#### Q: "How does the system handle real-world network outages in rural areas?"
-> **Your Answer**:
-> *"We implemented a multi-tier graceful degradation strategy:
-> 1. If OSRM routing times out, the system falls back to Haversine distance adjusted by a **1.3 road-winding factor**;
-> 2. If the diesel scraper is blocked, it defaults to the latest validated state benchmark (₹97.83/L);
-> 3. If geocoding times out, it uses a local in-memory agricultural district coordinate registry;
-> 4. If live mandi APIs are down, it reads from our 325-commodity localized historical CSV repository."*
-
----
-
 ## 🚀 Executive Summary & The Core Problem
 
 Smallholder farmers across India face systemic economic disadvantages:
