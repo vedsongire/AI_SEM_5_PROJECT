@@ -28,10 +28,11 @@
    - [2. PredictorAgent (`src/agents/predictor.py`)](#2-predictoragentsrcagentspredictorpy)
    - [3. PlannerAgent (`src/agents/planner.py`)](#3-planneragentsrcagentsplannerpy)
    - [4. VoiceAgent (`src/agents/voice.py`)](#4-voiceagentsrcagentsvoicepy)
-7. [📱 Omnichannel Integration Services](#-omnichannel-integration-services)
-   - [1. TelephonyService (`src/services/telephony_service.py`)](#1-telephonyservicesrcservicestelephony_servicepy)
-   - [2. WhatsAppService (`src/services/whatsapp_service.py`)](#2-whatsappservicesrcserviceswhatsapp_servicepy)
-   - [3. Single-Page Glassmorphic Web Dashboard (`src/ui/app.py`)](#3-single-page-glassmorphic-web-dashboardsrcuiapppy)
+7. [🎙️ Kisan Mitra Voice & Web Interface Architecture](#-kisan-mitra-voice--web-interface-architecture)
+   - [1. In-Browser Speech Recognition & Microphone Stream](#1-in-browser-speech-recognition--microphone-stream)
+   - [2. Dynamic Vernacular Natural Language Understanding (NLU)](#2-dynamic-vernacular-natural-language-understanding-nlu)
+   - [3. Google Text-to-Speech (gTTS) Audio Synthesis & Streaming](#3-google-text-to-speech-gtts-audio-synthesis--streaming)
+   - [4. Direct WhatsApp Community Viral Distribution](#4-direct-whatsapp-community-viral-distribution)
 8. [📐 Mathematical Modeling & Algorithmic Formulations](#-mathematical-modeling--algorithmic-formulations)
    - [Asymmetric Quantile Pinball Loss](#1-asymmetric-quantile-pinball-loss)
    - [Spatial Arbitrage & Net Pocket Profit Equation](#2-spatial-arbitrage--net-pocket-profit-equation)
@@ -77,7 +78,7 @@ Operating under a strict **100% data-driven, zero-hardcoding mandate**, K.I.S.A.
 - **Scout**: Ingests real-world APMC mandi records across **325+ crop databases** and live meteorological forecasts from Open-Meteo.
 - **Predictor**: Forecasts risk-adjusted price bands ($p_{10}$ downside floor, $p_{50}$ median expected, $p_{90}$ upside surge) using a 9-feature Multi-Quantile Gradient Boosting Regressor with dynamic district climatology mapping and SHAP explainability.
 - **Planner**: Scrapes live state diesel rates, calculates driving distance via the Project OSRM Highway Routing API, dynamically allocates freight vehicles by yield tonnage, and computes exact **Net Pocket Profit**.
-- **Voice / Services**: Delivers actionable advice over telephone calls (**IVR**), **WhatsApp voice notes**, or a modern **Glassmorphism Web Dashboard**.
+- **Voice & Web Platform**: Delivers actionable advice through **Kisan Mitra** (real-time in-browser vernacular voice assistant), direct **WhatsApp community viral sharing**, and a modern **Glassmorphic Spatial Arbitrage Dashboard**.
 
 ---
 
@@ -90,10 +91,10 @@ The table below details all components implemented, verified with unit/integrati
 | **Scout Agent** | `src/agents/scout.py` | ✅ **Complete** | Open-Meteo weather API integration, 325+ crop CSV ingestion, schema normalizer (`FIELD_KEY_MAP`), RAM-buffered search. |
 | **Predictor Agent** | `src/agents/predictor.py`<br/>`src/train.py` | ✅ **Complete** | 9-feature Quantile GBR ($p_{10}, p_{50}, p_{90}$), Open-Meteo archive climatology engine, weather shock multiplier, NDVI crop vigor softening, SHAP attribution. |
 | **Planner Agent** | `src/agents/planner.py` | ✅ **Complete** | Nominatim dynamic geocoding, candidate APMC discovery (< 400 km), Project OSRM driving distance & duration, GoodReturns live diesel scraper, 4-tier truck allocator, net profit equation. |
-| **Voice & NLU** | `src/agents/voice.py` | ✅ **Complete** | Google Speech Recognition (STT), multilingual regex/NLU intent & entity extractor (Hindi & English), gTTS audio synthesizer. |
-| **Telephony Service** | `src/services/telephony_service.py` | ✅ **Complete** | Automated outbound advisory dialing, inbound voice call handling, speech audio dispatch. |
-| **WhatsApp Service** | `src/services/whatsapp_service.py` | ✅ **Complete** | Twilio/Meta webhook payload handler, voice note audio processing (`.ogg` / `.mp3`), markdown summary cards. |
-| **Web UI Dashboard** | `src/ui/app.py`<br/>`src/ui/templates/index.html` | ✅ **Complete** | Glassmorphism dashboard, dynamic REST API (`POST /api/optimize`), interactive metric cards, comparison tables. |
+| **Voice & NLU Engine** | `src/agents/voice.py` | ✅ **Complete** | Google Speech-to-Text (STT), bilingual Hindi & English NLU entity & intent parser, and dynamic Google gTTS speech synthesizer. |
+| **In-Browser Voice Assistant** | `src/ui/app.py`<br/>`src/ui/templates/index.html` | ✅ **Complete** | Integrated *Kisan Mitra* browser microphone stream, dynamic speech transcription (`/api/voice/transcribe`), and interactive audio playback without third-party telephony costs. |
+| **Landing Page & Profit Estimator** | `src/ui/templates/landing.html` | ✅ **Complete** | High-conversion memorial landing page, interactive profit lift calculator, authentic farmer photography, and 1-click viral WhatsApp community share generator. |
+| **Live APMC Ticker Dashboard** | `src/ui/app.py`<br/>`src/ui/templates/index.html` | ✅ **Complete** | Glassmorphic dashboard with live auto-scrolling APMC commodity marquee, 1-click quick district & crop pills, and real-time REST API (`POST /api/optimize`). |
 | **Colab & Benchmarking**| `notebooks/colab_model_evaluation.py`<br/>`evaluation_results/` | ✅ **Complete** | Full IEEE conference table generator, MAE/RMSE/$R^2$ baseline comparisons, PICP empirical evaluation (79.46%). |
 | **Test Automation** | `tests/test_pipeline.py`<br/>`tests/test_voice_agent.py` | ✅ **Complete** | Multi-state real pipeline tests (UP, MP, Haryana), Hindi/English NLU verification, end-to-end voice-to-arbitrage integration tests. |
 
@@ -105,19 +106,19 @@ The table below details all components implemented, verified with unit/integrati
 
 ```mermaid
 flowchart TB
-    subgraph Farmer_Channels["🌾 Farmer Touchpoints (Omnichannel)"]
-        F1["🗣️ Vernacular Voice Call<br/>(Telephony / Inbound & Outbound IVR)"]
-        F2["💬 WhatsApp Chatbot & Voice Notes<br/>(Twilio / WhatsApp Business API)"]
-        F3["💻 Single-Page Web Dashboard<br/>(Flask / TailwindCSS Glassmorphic UI)"]
+    subgraph Farmer_Touchpoints["🌾 Farmer Touchpoints (Web & Mobile)"]
+        F1["💻 Spatial Arbitrage Dashboard<br/>(Live APMC Price Ticker & Quick-Pills)"]
+        F2["🌾 High-Conversion Landing Page<br/>(Instant Profit Estimator & Shastri Memorial)"]
+        F3["🎙️ Kisan Mitra Voice Assistant<br/>(In-Browser Microphone & Real-Time Audio)"]
+        F4["📲 WhatsApp Community Share<br/>(1-Click Viral Peer-to-Peer Distribution)"]
     end
 
-    subgraph Service_Layer["⚡ Telephony & Messaging Middleware"]
-        TEL["TelephonyService<br/>(Call State, Audio Dispatch, Outbound Dialing)"]
-        WA["WhatsAppService<br/>(Webhook Parsing, Card Formatting, Audio Media)"]
+    subgraph Web_Application_Layer["⚡ Flask Web Application & REST API (src/ui/app.py)"]
+        API["Flask Controller & Endpoint Dispatcher<br/>• POST /api/optimize (Spatial Arbitrage Core)<br/>• POST /api/chat (Kisan Mitra Vernacular Advisory)<br/>• POST /api/voice/transcribe (Audio Stream STT)<br/>• GET /api/benchmarks (Historical Records)"]
     end
 
     subgraph Voice_Layer["🎙️ Voice & NLU Engine"]
-        VA["VoiceAgent<br/>• Google SpeechRecognition (Audio to Text)<br/>• Multilingual NLU Entity & Intent Parser<br/>• Google gTTS Speech Synthesizer (MP3 Audio)"]
+        VA["VoiceAgent (src/agents/voice.py)<br/>• Google SpeechRecognition (Audio to Text)<br/>• Multilingual NLU Entity & Intent Parser<br/>• Google gTTS Speech Synthesizer (MP3 Stream)"]
     end
 
     subgraph Multi_Agent_Core["🤖 Cooperative Multi-Agent Brain"]
@@ -153,14 +154,19 @@ flowchart TB
         DATA["Local Commodity Repositories<br/>(data_vegetable_wise/ 325 CSVs)"]
     end
 
-    %% Wiring
-    F1 --> TEL
-    F2 --> WA
-    TEL --> VA
-    WA --> VA
-    F3 --> Multi_Agent_Core
+    %% Flow Wiring
+    F1 --> API
+    F2 --> API
+    F3 --> API
+    F4 -.->|Peer-to-Peer Referral Link| F2
 
-    VA --> Scout
+    API --> VA
+    API --> Multi_Agent_Core
+
+    VA --> Multi_Agent_Core
+    Multi_Agent_Core --> VA
+    VA --> API
+
     Scout --> METEO
     Scout --> DATA
 
@@ -170,10 +176,9 @@ flowchart TB
     Planner --> OSRM
     Planner --> DIESEL
 
-    Planner --> VA
-    VA --> TEL
-    VA --> WA
-    Planner --> F3
+    Multi_Agent_Core --> API
+    API --> F1
+    API --> F3
 ```
 
 ---
@@ -186,44 +191,46 @@ The following sequence illustrates the exact runtime execution lifecycle when a 
 sequenceDiagram
     autonumber
     actor Farmer as 👨‍🌾 Farmer (Ramesh / Suresh)
-    participant UI as 💻 Web / Voice / WhatsApp
-    participant Voice as 🎙️ VoiceAgent
+    participant Web as 💻 Web Interface (Dashboard / Landing)
+    participant Mic as 🎙️ Browser Microphone Stream
+    participant Voice as 🧠 VoiceAgent & NLU Engine
     participant Planner as 🗺️ PlannerAgent
     participant Scout as 🛰️ ScoutAgent
     participant Predictor as 📈 PredictorAgent
     participant External as 🌐 External APIs (OSRM / Nominatim / Open-Meteo)
 
-    Farmer->>UI: "Where should I sell 80 quintals of Onion from Jalna?"
-    UI->>Voice: Raw text query or spoken audio bytes
-    Voice->>Voice: Transcribe audio (STT) & Parse Entities (Crop: Onion, Qty: 80, Loc: Jalna)
-    Voice->>Planner: Request optimal trading route for (Jalna, Onion, 80 qt)
+    Farmer->>Mic: Spoken Vernacular Query: "Jalna mein 80 quintal pyaaz kahan bechein?"
+    Mic->>Web: Streams Raw Audio Bytes via MediaRecorder API
+    Web->>Voice: POST /api/voice/transcribe (Audio Stream STT)
+    Voice->>Voice: Google SpeechRecognition STT & Multilingual NLU Entity Parser
+    Note over Voice: Extracted: Crop="Onion", Quantity=80 qt, Location="Jalna"
+    Voice->>Planner: Route Request: (Origin: Jalna, Crop: Onion, Volume: 80 qt)
     
-    Planner->>External: Geocode "Jalna, Maharashtra" (Nominatim)
+    Planner->>External: Dynamic Geocoding "Jalna, Maharashtra" (Nominatim)
     External-->>Planner: Coordinates: lat=19.8347, lon=75.8816, District=Jalna
     
-    Planner->>Scout: Fetch weather & candidate APMCs for Onion in Maharashtra
-    Scout->>External: Query Open-Meteo (lat=19.83, lon=75.88)
-    External-->>Scout: Weather: Temp=28.5°C, Raincode=0 (Clear)
-    Scout->>Scout: Query Onion.csv / fallback database for regional markets
-    Scout-->>Planner: Candidate markets: [Mumbai Vashi, Pune APMC, Nashik APMC]
+    Planner->>Scout: Query Weather & Candidate Mandis for Onion
+    Scout->>External: Live Climatology Query (Open-Meteo API)
+    External-->>Scout: Weather: Temp=28.5°C, Rain=0.0mm (Normal Conditions)
+    Scout->>Scout: Ingest Onion.csv / mandi_historical_fallback.csv
+    Scout-->>Planner: Candidate Mandis: [Mumbai Vashi, Pune APMC, Nashik APMC]
 
-    Planner->>Predictor: Predict price bands (p10, p50, p90) for candidate markets
-    Predictor->>Predictor: Extract 9 features (Date, District Climatology, Market, Variety)
-    Predictor->>Predictor: Inference using Quantile GBR (p10, p50, p90)
-    Predictor->>Predictor: Apply Weather Shock (Rain=None) & NDVI Vigor modifier
-    Predictor-->>Planner: Price predictions: Vashi=₹3,450, Pune=₹3,100, Nashik=₹2,850
+    Planner->>Predictor: Compute Quantile Price Bands (p10, p50, p90)
+    Predictor->>Predictor: Synthesize 9 Features (Date, Climatology, Variety, Mandi)
+    Predictor->>Predictor: Multi-Quantile GBR Inference & Weather Shock Adjustment
+    Predictor-->>Planner: Predictions: Vashi=₹3,450/qt, Pune=₹3,100/qt, Nashik=₹2,850/qt
 
-    Planner->>External: Query OSRM Highway Route (Jalna -> Mumbai Vashi)
-    External-->>Planner: Road distance = 385.2 km, Travel time = 430 mins
-    Planner->>External: Scrape live diesel rate for Maharashtra (GoodReturns)
-    External-->>Planner: Diesel rate = ₹92.49 / Liter
-    Planner->>Planner: Allocate truck (80 qt -> 8-Ton Truck, 7.5 km/l, Toll=₹350, Loading=₹1,200)
-    Planner->>Planner: Compute Net Profit = Gross Revenue - Roundtrip Haulage
-    Planner-->>Voice: Ranked recommendations (Hero Winner: Mumbai Vashi, Net Profit: ₹2,64,949)
+    Planner->>External: Project OSRM Highway Route (Jalna -> Mumbai Vashi)
+    External-->>Planner: Highway distance = 385.2 km, Travel time = 7.1 hrs
+    Planner->>External: Scrape Live Diesel Rate (GoodReturns Maharashtra)
+    External-->>Planner: Current Diesel = ₹92.49 / Liter
+    Planner->>Planner: Dynamic Fleet Sizing (80 qt -> 8-Ton Truck, 7.5 km/L)
+    Planner->>Planner: Net Profit = Revenue - (Fuel + Toll + Handling)
+    Planner-->>Voice: Ranked Recommendations (Winner: Mumbai Vashi APMC, +₹84,949 over local)
 
-    Voice->>Voice: Synthesize vernacular speech script (Hindi / English) via gTTS
-    Voice-->>UI: Output JSON payload + Spoken MP3 Audio
-    UI-->>Farmer: Displays interactive cards or plays Hindi voice advisory
+    Voice->>Voice: Synthesize Hindi/English Spoken Advisory via gTTS
+    Voice-->>Web: JSON Arbitrage Payload + Base64 MP3 Audio Stream
+    Web-->>Farmer: Glassmorphic Profit Cards Rendered & Kisan Mitra Audio Auto-Plays!
 ```
 
 ---
@@ -385,25 +392,31 @@ Responsible for speech transcription, vernacular Natural Language Understanding 
 
 ---
 
-## 📱 Omnichannel Integration Services
+## 🎙️ Kisan Mitra Voice & Web Interface Architecture
 
-### 1. TelephonyService (`src/services/telephony_service.py`)
-Enables integration with telecommunication providers (Twilio, Exotel, Asterisk) for automated phone advisory:
-- `trigger_outbound_call(farmer_phone, farmer_location, commodity, quantity_quintals, language)`:
-  Initiates an automated advisory call to a registered farmer when favorable market arbitrage is detected. Generates synthesized audio speech and logs call records.
-- `handle_inbound_call(farmer_phone, speech_input, language)`:
-  Handles incoming calls where the farmer speaks their inquiry into the receiver. Transcribes speech, runs the agent core, and streams audio back in real time.
+Rather than relying on cost-prohibitive paid telephony gateways or closed telecom aggregators, K.I.S.A.N. AI deploys a zero-overhead, open-access architecture consisting of in-browser Web Audio speech processing, vernacular Natural Language Understanding (NLU), and direct peer-to-peer WhatsApp community distribution.
 
-### 2. WhatsAppService (`src/services/whatsapp_service.py`)
-Enables direct farmer communication via WhatsApp Business API / Twilio webhooks:
-- `process_incoming_message(from_phone, message_body, media_bytes, media_type, language)`:
-  Accepts both written text messages and recorded WhatsApp voice notes (`.ogg` Opus / `.mp3`). Runs the VoiceAgent to decode the query and replies with:
-  1. Spoken audio voice reply.
-  2. High-readability WhatsApp markdown summary card detailing Hero Market, expected modal price, haulage deduction, and net profit.
-- `handle_webhook_payload(payload: Dict)`:
-  Standard webhook parser for Twilio / Meta WhatsApp webhooks.
+### 1. In-Browser Speech Recognition & Microphone Stream
+- **HTML5 MediaRecorder Web Audio**: Farmers tap the microphone icon in the *Kisan Mitra* interface to record spoken audio queries directly within the browser without installing external telephony apps or incurring telecom charges.
+- **Real-Time Endpoint (`POST /api/voice/transcribe`)**: Spoken audio bytes (`audio/wav`, `audio/webm`, or `audio/ogg`) are dispatched asynchronously to Flask, where `SpeechRecognition` processes the acoustic signal using the Google Speech-to-Text API configured for multi-dialect recognition (`hi-IN`, `en-IN`).
+- **Conversational Chat Assistant (`POST /api/chat`)**: Multi-turn dialogue controller maintaining session state, responding with greeting etiquette (*"राम राम किसान भाई"*), asking clarification questions for missing inputs, or autonomously executing the multi-agent pipeline when all parameters are detected.
 
-### 3. Single-Page Glassmorphic Web Dashboard (`src/ui/app.py`)
+### 2. Dynamic Vernacular Natural Language Understanding (NLU)
+The NLU engine (`src/agents/voice.py`) parses free-form natural language queries dynamically without hardcoded dictionary lookups:
+- **Bilingual Commodity Extraction**: Parses English and Devanagari Hindi crop names (e.g., *प्याज / Pyaz / Onion*, *गेहूं / Gehun / Wheat*, *टमाटर / Tamatar / Tomato*, *आलू / Aloo / Potato*).
+- **Quantity & Unit Parsing**: Captures Hindi and English units (*क्विंटल / quintal / qt*, *टन / ton*, *किलो / kg*, *बोरी / bag*) and standardizes them to metric quintals.
+- **Location Identification**: Strips linguistic framing and stop-words to isolate districts, mandis, or villages (e.g., *"नासिक में"*, *"from Jalna"*).
+- **Intent Classification**: Classifies queries into `ARBITRAGE_RECOMMENDATION`, `MANDI_PRICE`, `WEATHER_INQUIRY`, `GREETING`, or `HELP`.
+
+### 3. Google Text-to-Speech (gTTS) Audio Synthesis & Streaming
+- **Dynamic Script Generation**: Formulates natural, conversational Hindi or English spoken advisory detailing the winning mandi name, price per quintal, round-trip transport deduction, and total net profit.
+- **Base64 Audio Streaming**: Synthesizes MP3 audio bytes using `gTTS`, encoded into a `data:audio/mp3;base64,...` URI, and streamed back to the browser for instant playback with no audio file accumulation on disk.
+
+### 4. Direct WhatsApp Community Viral Distribution
+- **Zero-Cost Peer Sharing**: Instead of gated enterprise messaging APIs that charge per-message fees, the landing page and dashboard feature a **1-click WhatsApp community referral generator**.
+- **Contextual Referral Encoding**: Dynamically generates URI-encoded WhatsApp share links pre-populated with Shastri Ji's memorial slogan, localized crop profit projections, and platform referral links (`https://api.whatsapp.com/send?text=...`) for organic, viral farmer-to-farmer adoption.
+
+### 5. Single-Page Glassmorphic Web Dashboard (`src/ui/app.py`)
 Provides an open-access web UI with custom glassmorphic styling, responsive cards, real-time query inputs, and instant comparison tables.
 
 ---
@@ -726,14 +739,13 @@ AI_SEM_5_PROJECT/
 │   │   ├── scout.py                    # Environmental & data ingestion agent
 │   │   └── voice.py                    # Multilingual voice & NLU agent
 │   ├── services/
-│   │   ├── __init__.py
-│   │   ├── telephony_service.py        # Automated outbound/inbound phone call service
-│   │   └── whatsapp_service.py         # WhatsApp webhook & messaging service
+│   │   └── __init__.py                 # Service layer package
 │   ├── ui/
-│   │   ├── app.py                      # Flask web application controller
-│   │   ├── static/                     # Web assets
+│   │   ├── app.py                      # Flask web application controller & REST APIs
+│   │   ├── static/                     # CSS, JS, audio, and memorial photo assets
 │   │   └── templates/
-│   │       └── index.html              # Single-page dashboard interface
+│   │       ├── index.html              # Spatial arbitrage dashboard & Kisan Mitra UI
+│   │       └── landing.html            # High-conversion memorial landing page
 │   └── train.py                        # Model training and artifact serialization script
 ├── tests/
 │   ├── __init__.py
@@ -794,7 +806,7 @@ Run the full automated test suite using Python:
 # Run the real multi-agent pipeline integration test (Muzaffarnagar UP, Indore MP, Karnal Haryana)
 python tests/test_pipeline.py
 
-# Run the voice agent & communications test (Hindi/English NLU, TTS audio, WhatsApp, Telephony)
+# Run the voice agent tests (Hindi/English NLU, gTTS audio synthesis, multi-turn conversational chat)
 python tests/test_voice_agent.py
 ```
 
