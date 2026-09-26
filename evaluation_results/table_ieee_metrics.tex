@@ -1,0 +1,16 @@
+% --- IEEE Conference Table Format ---
+\begin{table}[htbp]
+\caption{Empirical Evaluation & Baseline Comparison on Mandi Price Dataset}
+\label{tab:model_evaluation}
+\centering
+\begin{tabular}{lcccc}
+\hline
+\textbf{Model Architecture} & \textbf{MAE (INR)} & \textbf{RMSE (INR)} & \textbf{$R^2$ Score} & \textbf{PICP (80\%)} \\
+\hline
+Baseline Mean (Dummy) & 2857.11 & 5031.25 & -0.0001 & N/A \\
+Ridge Linear Regressor & 2869.78 & 5027.68 & 0.0013 & N/A \\
+Random Forest Regressor & 1407.25 & 2793.80 & 0.6916 & N/A \\
+\textbf{Proposed Multi-Quantile GBR} & \textbf{1660.42} & \textbf{4026.78} & \textbf{0.3594} & \textbf{79.46\%} \\
+\hline
+\end{tabular}
+\end{table}

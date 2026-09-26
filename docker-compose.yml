@@ -1,0 +1,18 @@
+services:
+  kisan-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: kisan-ai:latest
+    container_name: kisan-ai-app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - FLASK_DEBUG=0
+    volumes:
+      # Mount datasets, trained models, and configs directly from host
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./config:/app/config

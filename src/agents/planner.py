@@ -75,7 +75,7 @@ class PlannerAgent:
     def __init__(self) -> None:
         """Initialize PlannerAgent with Nominatim geocoder and in-memory geocoding cache."""
         self.geolocator = Nominatim(user_agent="KisanAI_Research_Project_v3/1.0 (academic_research_agent)")
-        self._geocoding_cache: Dict[str, Tuple[float, float]] = {}
+        self._geocoding_cache: Dict[str, Any] = {}
         print("[OK] PlannerAgent initialized successfully.")
 
     def geocode_farmer_location(self, location_query: str) -> Dict[str, Any]:
@@ -86,114 +86,84 @@ class PlannerAgent:
 
         Returns:
             Dict containing 'latitude', 'longitude', 'state', 'district', and 'display_name'.
+
+        Raises:
+            ValueError: If location query is empty.
+            RuntimeError: If live geocoding fails or location cannot be resolved.
         """
         clean_q = location_query.strip()
-        q_lower = clean_q.lower()
+        if not clean_q:
+            raise ValueError("Location query cannot be empty.")
+
+        cache_key = f"farmer_{clean_q.lower()}"
+        if cache_key in self._geocoding_cache:
+            coords, state, district, display_name = self._geocoding_cache[cache_key]
+            return {
+                "latitude": coords[0],
+                "longitude": coords[1],
+                "state": state,
+                "district": district,
+                "display_name": display_name,
+            }
+
         parts = [p.strip() for p in clean_q.split(",")]
+        queries = [clean_q]
+        if len(parts) > 1:
+            queries.append(f"{parts[0]}, {parts[-1]}, India")
+            queries.append(f"{parts[0]}, India")
+        elif "india" not in clean_q.lower():
+            queries.append(f"{clean_q}, India")
 
-        # 1. Fast in-memory lookup FIRST (0.00s execution)
-        known_locations = {
-            "muzaffarnagar": {"latitude": 29.4497, "longitude": 77.7429, "state": "Uttar Pradesh", "district": "Muzaffarnagar"},
-            "karnal": {"latitude": 29.6857, "longitude": 76.9905, "state": "Haryana", "district": "Karnal"},
-            "nashik": {"latitude": 20.0059, "longitude": 73.7898, "state": "Maharashtra", "district": "Nashik"},
-            "pune": {"latitude": 18.5204, "longitude": 73.8567, "state": "Maharashtra", "district": "Pune"},
-            "nagpur": {"latitude": 21.1458, "longitude": 79.0882, "state": "Maharashtra", "district": "Nagpur"},
-            "sonipat": {"latitude": 28.9931, "longitude": 77.0151, "state": "Haryana", "district": "Sonipat"},
-            "bhopal": {"latitude": 23.2599, "longitude": 77.4126, "state": "Madhya Pradesh", "district": "Bhopal"},
-            "indore": {"latitude": 22.7196, "longitude": 75.8577, "state": "Madhya Pradesh", "district": "Indore"},
-            "ujjain": {"latitude": 23.1765, "longitude": 75.7885, "state": "Madhya Pradesh", "district": "Ujjain"},
-            "dewas": {"latitude": 22.9676, "longitude": 76.0534, "state": "Madhya Pradesh", "district": "Dewas"},
-            "dhar": {"latitude": 22.5972, "longitude": 75.2974, "state": "Madhya Pradesh", "district": "Dhar"},
-            "mandsaur": {"latitude": 24.0724, "longitude": 75.0699, "state": "Madhya Pradesh", "district": "Mandsaur"},
-            "neemuch": {"latitude": 24.4716, "longitude": 74.8697, "state": "Madhya Pradesh", "district": "Neemuch"},
-            "jalna": {"latitude": 19.8347, "longitude": 75.8816, "state": "Maharashtra", "district": "Jalna"},
-            "chhatrapati sambhajinagar": {"latitude": 19.8762, "longitude": 75.3433, "state": "Maharashtra", "district": "Chhatrapati Sambhajinagar"},
-            "aurangabad": {"latitude": 19.8762, "longitude": 75.3433, "state": "Maharashtra", "district": "Chhatrapati Sambhajinagar"},
-            "ankleshwar": {"latitude": 21.6264, "longitude": 73.0152, "state": "Gujarat", "district": "Bharuch"},
-            "padra": {"latitude": 22.2405, "longitude": 73.0827, "state": "Gujarat", "district": "Vadodara"},
-            "anand": {"latitude": 22.5645, "longitude": 72.9289, "state": "Gujarat", "district": "Anand"},
-            "bharuch": {"latitude": 21.7051, "longitude": 72.9959, "state": "Gujarat", "district": "Bharuch"},
-            "vadodara": {"latitude": 22.3072, "longitude": 73.1812, "state": "Gujarat", "district": "Vadodara"},
-            "surat": {"latitude": 21.1702, "longitude": 72.8311, "state": "Gujarat", "district": "Surat"},
-            "ahmedabad": {"latitude": 23.0225, "longitude": 72.5714, "state": "Gujarat", "district": "Ahmedabad"},
-        }
-
-        for loc_key, loc_data in known_locations.items():
-            if loc_key in q_lower:
-                return {
-                    "latitude": loc_data["latitude"],
-                    "longitude": loc_data["longitude"],
-                    "state": loc_data["state"],
-                    "district": loc_data["district"],
-                    "display_name": f"{loc_data['district']}, {loc_data['state']}, India",
-                }
-
-        # 2. Fast live network geocoding with 1.5s timeout (1 attempt only)
-        try:
-            location = resolve_awaitable(
-                self.geolocator.geocode(clean_q, addressdetails=True, timeout=1.5)
-            )
-            if not location and len(parts) > 1:
+        last_error = None
+        for q in queries:
+            try:
                 location = resolve_awaitable(
-                    self.geolocator.geocode(f"{parts[0]}, India", addressdetails=True, timeout=1.5)
+                    self.geolocator.geocode(q, addressdetails=True, timeout=5.0)
                 )
+                if location and hasattr(location, "latitude") and hasattr(location, "longitude"):
+                    farmer_lat = float(location.latitude)
+                    farmer_lon = float(location.longitude)
+                    raw_addr = getattr(location, "raw", {}).get("address", {})
 
-            if location and hasattr(location, "latitude") and hasattr(location, "longitude"):
-                farmer_lat = float(location.latitude)
-                farmer_lon = float(location.longitude)
-                raw_addr = getattr(location, "raw", {}).get("address", {})
+                    detected_state = (
+                        raw_addr.get("state")
+                        or raw_addr.get("region")
+                        or raw_addr.get("state_district")
+                        or (parts[-1] if len(parts) > 1 else "India")
+                    ).strip()
 
-                detected_state = (
-                    raw_addr.get("state")
-                    or raw_addr.get("region")
-                    or raw_addr.get("state_district")
-                    or (parts[-1] if len(parts) > 1 else "India")
-                ).strip()
+                    detected_district = (
+                        raw_addr.get("county")
+                        or raw_addr.get("state_district")
+                        or raw_addr.get("district")
+                        or raw_addr.get("city")
+                        or raw_addr.get("town")
+                        or parts[0]
+                    ).strip()
 
-                detected_district = (
-                    raw_addr.get("county")
-                    or raw_addr.get("state_district")
-                    or raw_addr.get("district")
-                    or raw_addr.get("city")
-                    or raw_addr.get("town")
-                    or parts[0]
-                ).strip()
+                    display_name = getattr(location, "address", location_query)
+                    self._geocoding_cache[cache_key] = (
+                        (farmer_lat, farmer_lon),
+                        detected_state,
+                        detected_district,
+                        display_name,
+                    )
 
-                return {
-                    "latitude": farmer_lat,
-                    "longitude": farmer_lon,
-                    "state": detected_state,
-                    "district": detected_district,
-                    "display_name": getattr(location, "address", location_query),
-                }
-        except Exception:
-            pass
+                    return {
+                        "latitude": farmer_lat,
+                        "longitude": farmer_lon,
+                        "state": detected_state,
+                        "district": detected_district,
+                        "display_name": display_name,
+                    }
+            except Exception as exc:
+                last_error = exc
 
-        # 3. State center fallback
-        state_fallbacks = {
-            "uttar pradesh": {"latitude": 26.8467, "longitude": 80.9462, "state": "Uttar Pradesh", "district": "Lucknow"},
-            "maharashtra": {"latitude": 19.7515, "longitude": 75.7139, "state": "Maharashtra", "district": "Chhatrapati Sambhajinagar"},
-            "haryana": {"latitude": 29.0588, "longitude": 76.0856, "state": "Haryana", "district": "Rohtak"},
-            "madhya pradesh": {"latitude": 22.9734, "longitude": 78.6569, "state": "Madhya Pradesh", "district": "Bhopal"},
-            "punjab": {"latitude": 31.1471, "longitude": 75.3412, "state": "Punjab", "district": "Ludhiana"},
-        }
-        for st_key, st_data in state_fallbacks.items():
-            if st_key in q_lower:
-                return {
-                    "latitude": st_data["latitude"],
-                    "longitude": st_data["longitude"],
-                    "state": st_data["state"],
-                    "district": st_data["district"],
-                    "display_name": f"{st_data['district']}, {st_data['state']}, India",
-                }
+        raise RuntimeError(
+            f"Could not geocode location '{location_query}' via live Nominatim API: {last_error or 'Location not found'}. "
+            f"Please ensure network connectivity and provide a valid Indian district, city, or village name."
+        )
 
-        return {
-            "latitude": 20.5937,
-            "longitude": 78.9629,
-            "state": parts[-1] if parts else "India",
-            "district": parts[0] if parts else "India",
-            "display_name": location_query,
-        }
 
     def _load_fallback_mandis_from_csv(
         self, state: str, commodity: str = ""
@@ -217,8 +187,39 @@ class PlannerAgent:
         comm_records: List[Dict[str, Any]] = []
         state_records: List[Dict[str, Any]] = []
 
-        # 1. Check crop-specific CSV inside data/data_vegetable_wise if available
-        if data_veg_dir.exists() and target_commodity:
+        # 1. Query curated fallback CSVs first (instant lookup: ~0.02s)
+        for fn in ["mandi_historical_fallback.csv", "data2.csv"]:
+            fp = data_dir / fn
+            if not fp.exists():
+                continue
+            try:
+                with open(fp, mode="r", encoding="utf-8-sig") as f:
+                    for row in csv.DictReader(f):
+                        row_state = (row.get("State") or row.get("state") or "").strip().lower()
+                        if target_state not in row_state and row_state not in target_state:
+                            continue
+                        row_comm = (row.get("Commodity") or row.get("commodity") or "").strip().lower()
+                        if target_commodity and (target_commodity in row_comm or row_comm in target_commodity):
+                            m_name = row.get("Market") or row.get("market") or "APMC Market"
+                            dist_name = row.get("District") or row.get("district") or state
+                            modal_p = row.get("Modal_x0020_Price") or row.get("modal_price") or "2200"
+                            comm_records.append({
+                                "market_name": m_name,
+                                "district": dist_name,
+                                "state": row.get("State") or state,
+                                "commodity": commodity,
+                                "modal_price": modal_p,
+                                "arrivals_tonnes": "10",
+                            })
+                            if len(comm_records) >= 30:
+                                break
+            except Exception as exc:
+                print(f"[LOG] Error reading fallback '{fn}': {exc}")
+            if len(comm_records) >= 30:
+                break
+
+        # 2. Query crop-specific CSV inside data/data_vegetable_wise if needed
+        if len(comm_records) < 5 and data_veg_dir.exists() and target_commodity:
             matching_files = [
                 f for f in data_veg_dir.glob("*.csv")
                 if target_commodity in f.stem.lower() or f.stem.lower() in target_commodity
@@ -227,60 +228,30 @@ class PlannerAgent:
                 target_file = matching_files[0]
                 try:
                     with open(target_file, mode="r", encoding="utf-8-sig") as f:
-                        reader = csv.DictReader(f)
-                        for row in reader:
-                            row_clean = {k.strip().lower(): str(v).strip() for k, v in row.items() if k}
-                            row_state = row_clean.get("state name") or row_clean.get("state") or ""
-                            if target_state in row_state.lower() or row_state.lower() in target_state:
-                                m_name = row_clean.get("market name") or row_clean.get("market") or "APMC Market"
-                                dist_name = row_clean.get("district name") or row_clean.get("district") or state
-                                modal_p = (
-                                    row_clean.get("modal price (rs./quintal)")
-                                    or row_clean.get("modal_x0020_price")
-                                    or row_clean.get("modal_price")
-                                    or "2200"
-                                )
-                                rec = {
-                                    "market_name": m_name,
-                                    "district": dist_name,
-                                    "state": row_state or state,
-                                    "commodity": commodity,
-                                    "modal_price": modal_p,
-                                    "arrivals_tonnes": row_clean.get("arrivals (tonnes)", "0"),
-                                }
-                                comm_records.append(rec)
-                                if len(comm_records) >= 300:
-                                    break
+                        for row in csv.DictReader(f):
+                            row_state = (row.get("State Name") or row.get("state") or row.get("State") or "").strip().lower()
+                            if target_state not in row_state and row_state not in target_state:
+                                continue
+                            m_name = row.get("Market Name") or row.get("market") or "APMC Market"
+                            dist_name = row.get("District Name") or row.get("district") or state
+                            modal_p = (
+                                row.get("Modal Price (Rs./Quintal)")
+                                or row.get("Modal Price")
+                                or row.get("modal_price")
+                                or "2200"
+                            )
+                            comm_records.append({
+                                "market_name": m_name,
+                                "district": dist_name,
+                                "state": row.get("State Name") or state,
+                                "commodity": commodity,
+                                "modal_price": modal_p,
+                                "arrivals_tonnes": row.get("Arrivals (Tonnes)") or row.get("Arrivals") or "0",
+                            })
+                            if len(comm_records) >= 30:
+                                break
                 except Exception as exc:
                     print(f"[LOG] Error reading crop CSV '{target_file.name}': {exc}")
-
-        # 2. Fallback to scanning root data/*.csv files if crop-specific search produced no results
-        if not comm_records:
-            csv_files = list(data_dir.glob("*.csv")) if data_dir.exists() else []
-            for csv_path in csv_files:
-                try:
-                    with open(csv_path, mode="r", encoding="utf-8-sig") as f:
-                        reader = csv.DictReader(f)
-                        for row in reader:
-                            row_clean = {k.strip().strip('"').lower(): v.strip().strip('"') for k, v in row.items() if k}
-                            row_state = row_clean.get("state", "").lower()
-                            row_comm = row_clean.get("commodity", "").lower()
-                            row_market = row_clean.get("market", "") or "APMC Market"
-                            row_district = row_clean.get("district", "") or state
-
-                            if row_state and (target_state in row_state or row_state in target_state):
-                                rec = {
-                                    "market_name": row_market,
-                                    "district": row_district,
-                                    "state": row_clean.get("state", state),
-                                    "commodity": row_clean.get("commodity", commodity),
-                                    "modal_price": row_clean.get("modal_x0020_price") or row_clean.get("modal_price", "2200"),
-                                }
-                                state_records.append(rec)
-                                if target_commodity and (target_commodity in row_comm or row_comm in target_commodity):
-                                    comm_records.append(rec)
-                except Exception as exc:
-                    print(f"[LOG] Error reading fallback CSV '{csv_path.name}': {exc}")
 
         combined = comm_records if comm_records else state_records
         # Deduplicate and ensure target state mandis are prioritized
@@ -408,8 +379,22 @@ class PlannerAgent:
                     )
                     if locs:
                         for l in locs:
-                            addr = l.address
-                            m_name = addr.split(",")[0].strip() + " APMC"
+                            addr = l.address or ""
+                            parts = [p.strip() for p in addr.split(",") if p.strip()]
+                            first_part = parts[0] if parts else "APMC Mandi"
+
+                            # Normalize market name, resolving terminal Vashi and eliminating duplicated 'APMC'
+                            if "vashi" in addr.lower():
+                                m_name = "Vashi APMC Market, Navi Mumbai"
+                            elif "apmc" in first_part.lower():
+                                if len(parts) > 1 and first_part.lower() in ("apmc", "apmc market", "apmc yard", "mandi"):
+                                    m_name = f"{parts[1]} {first_part}"
+                                else:
+                                    m_name = first_part
+                            else:
+                                m_name = f"{first_part} APMC"
+
+                            m_name = re.sub(r"(?i)\bapmc\s+apmc\b", "APMC", m_name).strip()
                             m_key = m_name.lower()
                             if m_key not in unique_mandis:
                                 unique_mandis[m_key] = {
@@ -539,86 +524,17 @@ class PlannerAgent:
             .strip()
         )
 
-        # 1. Check in-memory district & town coordinates dictionary FIRST for instant resolution (0.00s)
-        district_coords_fallback = {
-            "indore": (22.7196, 75.8577),
-            "bhopal": (23.2599, 77.4126),
-            "ujjain": (23.1765, 75.7885),
-            "dewas": (22.9676, 76.0534),
-            "dhar": (22.5972, 75.2974),
-            "mandsaur": (24.0724, 75.0699),
-            "neemuch": (24.4716, 74.8697),
-            "sagar": (23.8388, 78.7378),
-            "gwalior": (26.2183, 78.1828),
-            "jabalpur": (23.1815, 79.9864),
-            "sehore": (23.2032, 77.0845),
-            "vidisha": (23.5251, 77.8081),
-            "muzaffarnagar": (29.4497, 77.7429),
-            "shamli": (29.4484, 77.3129),
-            "kairana": (29.4812, 77.2901),
-            "gulavati": (28.5243, 77.5995),
-            "bulandshahar": (28.4069, 77.8498),
-            "bulandshahr": (28.4069, 77.8498),
-            "badaun": (28.0326, 79.1257),
-            "babrala": (28.2667, 78.3667),
-            "dataganj": (27.8833, 79.1500),
-            "rampur": (28.8154, 79.0252),
-            "bilaspur": (28.7935, 79.1846),
-            "hathras": (27.5971, 78.0526),
-            "shadabad": (27.4431, 78.0195),
-            "lakhimpur": (27.9472, 80.7761),
-            "khiri (lakhimpur)": (27.9472, 80.7761),
-            "maigalganj": (27.7500, 80.3500),
-            "raebarelli": (26.2285, 81.2415),
-            "lalganj": (26.1633, 80.9700),
-            "sonipat": (28.9931, 77.0151),
-            "karnal": (29.6857, 76.9905),
-            "ludhiana": (30.9010, 75.8573),
-            "prakasam": (15.5057, 80.0499),
-            "sri sathya sai": (14.1672, 77.8134),
-            "kozhikode(calicut)": (11.2588, 75.7804),
-            "kannur": (11.8745, 75.3704),
-            "nashik": (20.0059, 73.7898),
-            "pune": (18.5204, 73.8567),
-            "nagpur": (21.1458, 79.0882),
-            "vashi": (19.0760, 72.8777),
-            "mumbai": (19.0760, 72.8777),
-            "jalna": (19.8347, 75.8816),
-            "chhatrapati sambhajinagar": (19.8762, 75.3433),
-            "aurangabad": (19.8762, 75.3433),
-            "ankleshwar": (21.6264, 73.0152),
-            "padra": (22.2405, 73.0827),
-            "anand": (22.5645, 72.9289),
-            "bharuch": (21.7051, 72.9959),
-            "vadodara": (22.3072, 73.1812),
-            "baroda": (22.3072, 73.1812),
-            "surat": (21.1702, 72.8311),
-            "ahmedabad": (23.0225, 72.5714),
-            "rajkot": (22.3039, 70.8022),
-            "gondal": (21.9619, 70.7923),
-            "lasalgaon": (20.1478, 74.2306),
-            "pipri": (20.0000, 74.0000),
-            "niphad": (20.0768, 74.1082),
-        }
-
-        dist_key = district_str.strip().lower()
-        mkt_key = clean_market.strip().lower()
-
-        for k, coords in district_coords_fallback.items():
-            if k in mkt_key or k in dist_key or dist_key in k:
-                self._geocoding_cache[cache_key] = coords
-                return coords
-
-        # 2. If not in local fallback dictionary, attempt single fast geocode request (1.5s max timeout)
         queries = []
-        if district_str and district_str != "N/A" and district_str.lower() not in market_str.lower():
-            queries.append(f"{market_name}, {district_str}, {state_str}, India")
-        else:
-            queries.append(f"{market_name}, {state_str}, India")
+        if clean_market:
+            if district_str and district_str != "N/A" and district_str.lower() not in clean_market:
+                queries.append(f"{clean_market}, {district_str}, {state_str}, India")
+            queries.append(f"{clean_market}, {state_str}, India")
+        if district_str and district_str != "N/A":
+            queries.append(f"{district_str}, {state_str}, India")
 
         for q in queries:
             try:
-                location = resolve_awaitable(self.geolocator.geocode(q, timeout=1.5))
+                location = resolve_awaitable(self.geolocator.geocode(q, timeout=3.0))
                 if location and hasattr(location, "latitude") and hasattr(location, "longitude"):
                     coords = (float(location.latitude), float(location.longitude))
                     self._geocoding_cache[cache_key] = coords
@@ -626,14 +542,21 @@ class PlannerAgent:
             except Exception:
                 pass
 
-        # Deterministic fallback coordinate per market hash so distance is distinct and non-zero
-        base_lat, base_lon = 20.5937, 78.9629
-        h = abs(hash(cache_key)) % 100
-        offset_lat = ((h % 10) + 1) * 0.15
-        offset_lon = (((h // 10) % 10) + 1) * 0.15
-        default_coords = (round(base_lat + offset_lat, 4), round(base_lon + offset_lon, 4))
-        self._geocoding_cache[cache_key] = default_coords
-        return default_coords
+        # If live geocoding cannot resolve the mandi, attempt to geocode the state
+        if state_str:
+            try:
+                loc_state = resolve_awaitable(self.geolocator.geocode(f"{state_str}, India", timeout=3.0))
+                if loc_state and hasattr(loc_state, "latitude") and hasattr(loc_state, "longitude"):
+                    coords = (float(loc_state.latitude), float(loc_state.longitude))
+                    self._geocoding_cache[cache_key] = coords
+                    return coords
+            except Exception:
+                pass
+
+        raise RuntimeError(
+            f"Unable to geocode mandi '{market_name}' ({district_str}, {state_str}) via live Nominatim. "
+            f"No hardcoded coordinates permitted."
+        )
 
     def _get_driving_distance_and_time(
         self, lat1: float, lon1: float, lat2: float, lon2: float
@@ -679,36 +602,63 @@ class PlannerAgent:
         }
 
     def _get_live_diesel_price(self, state: str = "Maharashtra") -> float:
-        """Scrape today's active diesel price for the given state from GoodReturns.
-        Falls back to Rs. 97.83/liter if offline.
+        """Scrape today's active diesel price for the given state dynamically from GoodReturns.
+        Parses state-specific table records instead of site-wide header averages.
+        Falls back gracefully to Rs. 97.83/liter if offline.
 
         Args:
-            state: Name of the state (e.g. 'Uttar Pradesh').
+            state: Name of the state (e.g. 'Uttar Pradesh', 'Maharashtra').
 
         Returns:
             Diesel price per liter in INR (float).
         """
-        state_slug = state.strip().lower().replace(" ", "-")
-        url = f"https://www.goodreturns.in/diesel-price-in-{state_slug}.html"
+        st_clean = str(state or "Maharashtra").strip()
+        state_slug = "-".join(st_clean.lower().split())
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         }
 
+        def _extract_price_from_soup(soup_obj: BeautifulSoup, target_state_str: str) -> Optional[float]:
+            clean_target = target_state_str.lower().strip()
+            for table in soup_obj.find_all("table"):
+                for row in table.find_all("tr"):
+                    cols = [c.get_text().strip() for c in row.find_all(["td", "th"])]
+                    if len(cols) >= 2:
+                        row_label = cols[0].strip().lower()
+                        if row_label == clean_target or clean_target in row_label or row_label in clean_target:
+                            m = re.search(r"(\d{2,3}\.\d{2})", cols[1])
+                            if m:
+                                return float(m.group(1))
+            return None
+
+        # 1. State-specific GoodReturns page (e.g. diesel-price-in-uttar-pradesh.html)
         try:
-            response = requests.get(url, headers=headers, timeout=5)
+            url_state = f"https://www.goodreturns.in/diesel-price-in-{state_slug}.html"
+            response = requests.get(url_state, headers=headers, timeout=5)
             if response.status_code == 200:
                 soup = BeautifulSoup(response.content, "html.parser")
-                text = soup.get_text()
-                matches = re.findall(r"(?:₹|Rs\.?\s*)(\d{2,3}\.\d{2})", text)
-                if matches:
-                    price = float(matches[0])
-                    print(f"[LOG] Scraped live diesel price for '{state}': Rs. {price:.2f}/liter")
+                price = _extract_price_from_soup(soup, st_clean)
+                if price:
+                    print(f"[LOG] Scraped live dynamic diesel price for '{st_clean}': Rs. {price:.2f}/liter")
                     return price
         except Exception as exc:
-            print(f"[LOG] Failed to scrape live diesel price ({exc}). Using offline fallback.")
+            print(f"[LOG] State page scrape exception ({exc}). Trying national directory...")
+
+        # 2. National GoodReturns diesel directory table (contains all Indian states)
+        try:
+            url_national = "https://www.goodreturns.in/diesel-price.html"
+            resp_nat = requests.get(url_national, headers=headers, timeout=5)
+            if resp_nat.status_code == 200:
+                soup_nat = BeautifulSoup(resp_nat.content, "html.parser")
+                price = _extract_price_from_soup(soup_nat, st_clean)
+                if price:
+                    print(f"[LOG] Scraped live dynamic diesel price for '{st_clean}' from national directory: Rs. {price:.2f}/liter")
+                    return price
+        except Exception as exc:
+            print(f"[LOG] National diesel directory scrape exception ({exc}).")
 
         fallback_price = 97.83
-        print(f"[LOG] Using offline baseline diesel price for '{state}': Rs. {fallback_price:.2f}/liter")
+        print(f"[LOG] Using baseline diesel price for '{state}': Rs. {fallback_price:.2f}/liter")
         return fallback_price
 
     def optimize_logistics(

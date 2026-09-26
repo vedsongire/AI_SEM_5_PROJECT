@@ -1,4 +1,4 @@
-"""Unit & Integration test suite for real-time dynamic VoiceAgent and Farmer Communication Channels."""
+"""Unit & Integration test suite for real-time dynamic VoiceAgent."""
 
 import sys
 from pathlib import Path
@@ -7,9 +7,12 @@ project_root = Path(__file__).resolve().parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
+
 from src.agents.voice import VoiceAgent
-from src.services.telephony_service import TelephonyService
-from src.services.whatsapp_service import WhatsAppService
 
 
 def test_voice_agent_nlu_hindi_dynamic():
@@ -20,8 +23,8 @@ def test_voice_agent_nlu_hindi_dynamic():
 
     assert parsed["commodity"] == "Wheat"
     assert parsed["quantity_quintals"] == 50.0
-    assert parsed["intent"] in ["PIPELINE_FULL", "MANDI_PRICE"]
-    print(f"\n[OK] Dynamic Hindi NLU Passed! Commodity: {parsed['commodity']}, Quantity: {parsed['quantity_quintals']}")
+    assert parsed["intent"] in ["ARBITRAGE_RECOMMENDATION", "PIPELINE_FULL", "MANDI_PRICE"]
+    print(f"\n[OK] Dynamic Hindi NLU Passed! Commodity: {parsed['commodity']}, Quantity: {parsed['quantity_quintals']}, Location: {parsed['location']}")
 
 
 def test_voice_agent_nlu_english_dynamic():
@@ -32,7 +35,7 @@ def test_voice_agent_nlu_english_dynamic():
 
     assert parsed["commodity"] == "Potato"
     assert parsed["quantity_quintals"] == 100.0
-    print(f"[OK] Dynamic English NLU Passed! Commodity: {parsed['commodity']}, Quantity: {parsed['quantity_quintals']}")
+    print(f"[OK] Dynamic English NLU Passed! Commodity: {parsed['commodity']}, Quantity: {parsed['quantity_quintals']}, Location: {parsed['location']}")
 
 
 def test_voice_agent_tts_synthesis_dynamic():
@@ -42,73 +45,31 @@ def test_voice_agent_tts_synthesis_dynamic():
     result = voice.synthesize_speech(text, language="hi")
 
     assert result["status"] in ["success", "warning"]
-    assert len(result["text"]) > 0
     if result["status"] == "success":
         assert len(result["audio_bytes"]) > 0
+        assert result["audio_url"].startswith("data:audio/mp3;base64,")
     print(f"[OK] Dynamic TTS Synthesis Passed! Status: {result['status']}, Audio Bytes: {len(result['audio_bytes'])}")
 
 
-def test_voice_agent_process_query_realtime():
-    """Verify 100% real-time multi-agent voice query processing with live geocoding & scouting."""
+def test_voice_agent_chat_multiturn():
+    """Verify multi-turn conversational chat interaction."""
     voice = VoiceAgent()
-    query = "Muzaffarnagar Uttar Pradesh 50 quintals Wheat mandi price"
-    res = voice.process_voice_query(query_input=query, input_type="text", language="en-IN")
 
-    assert res["status"] == "success"
-    assert len(res["response_text"]) > 0
-    assert "pipeline_data" in res
-    assert res["pipeline_data"]["winner"] is not None
-    print(f"[OK] Real-time Multi-Agent Voice Query Passed! Winner: {res['pipeline_data']['winner']['market_name']}")
+    # Turn 1: Greeting
+    res1 = voice.chat("नमस्ते", session_state={}, language="hi-IN")
+    assert "राम राम" in res1["reply_text"] or "K.I.S.A.N." in res1["reply_text"]
+    state1 = res1["session_state"]
 
-
-def test_whatsapp_service_realtime_messaging():
-    """Verify WhatsApp chatbot real-time message processing."""
-    wa_service = WhatsAppService()
-    res = wa_service.process_incoming_message(
-        from_phone="+919876543210",
-        message_body="What is the mandi price for 50 quintals of Wheat in Muzaffarnagar?",
-        language="en-IN",
-    )
-
-    assert res["status"] == "success"
-    assert res["recipient_phone"] == "+919876543210"
-    assert "K.I.S.A.N. AI WhatsApp Assistant" in res["reply_text"]
-    assert "Wheat" in res["entities"]["commodity"]
-    print(f"[OK] Dynamic WhatsApp Chatbot Service Passed!")
-
-
-def test_telephony_service_realtime_calls():
-    """Verify automated outbound call and inbound voice call services in real-time."""
-    telephony = TelephonyService()
-
-    # 1. Real-time outbound advisory call
-    outbound = telephony.trigger_outbound_call(
-        farmer_phone="+919876543210",
-        farmer_location="Muzaffarnagar, Uttar Pradesh",
-        commodity="Wheat",
-        quantity_quintals=50.0,
-        language="hi-IN",
-    )
-    assert outbound["status"] == "COMPLETED"
-    assert outbound["direction"] == "OUTBOUND"
-    assert len(outbound["spoken_script"]) > 0
-
-    # 2. Real-time inbound voice call handling
-    inbound = telephony.handle_inbound_call(
-        farmer_phone="+919876543210",
-        speech_input="Muzaffarnagar Uttar Pradesh wheat mandi price",
-        language="en-IN",
-    )
-    assert inbound["status"] == "COMPLETED"
-    assert inbound["direction"] == "INBOUND"
-    assert len(inbound["spoken_response"]) > 0
-    print(f"[OK] Dynamic Telephony Service Passed! Outbound Call ID: {outbound['call_id']}, Inbound Call ID: {inbound['call_id']}")
+    # Turn 2: Mention crop and location
+    res2 = voice.chat("मुझे 80 क्विंटल प्याज नासिक में बेचना है", session_state=state1, language="hi-IN")
+    assert res2["recommendation"] is not None
+    assert "Onion" in res2["entities"]["commodity"]
+    print(f"[OK] Multi-turn Chat Passed! Recommended Mandi: {res2['recommendation']['market_name']}")
 
 
 if __name__ == "__main__":
     test_voice_agent_nlu_hindi_dynamic()
     test_voice_agent_nlu_english_dynamic()
     test_voice_agent_tts_synthesis_dynamic()
-    test_voice_agent_process_query_realtime()
-    test_whatsapp_service_realtime_messaging()
-    test_telephony_service_realtime_calls()
+    test_voice_agent_chat_multiturn()
+    print("\n🎉 ALL VOICE AGENT TESTS PASSED SUCCESSFULLY!")

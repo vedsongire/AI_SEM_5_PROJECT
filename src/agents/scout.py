@@ -18,17 +18,19 @@ class ScoutAgent:
     )
 
     FIELD_KEY_MAP = {
-        "state": ["state", "State"],
-        "commodity": ["commodity", "Commodity"],
-        "market": ["market", "Market", "market_name", "Market_Name"],
+        "state": ["state", "State", "State Name", "state name", "state_name"],
+        "commodity": ["commodity", "Commodity", "commodity name", "Commodity Name"],
+        "market": ["market", "Market", "market_name", "Market_Name", "Market Name", "market name"],
         "variety": ["variety", "Variety"],
-        "arrival_date": ["arrival_date", "Arrival_Date", "arrival date", "Arrival Date"],
+        "arrival_date": ["arrival_date", "Arrival_Date", "arrival date", "Arrival Date", "Reported Date", "reported date", "reported_date"],
         "min_price": [
             "min_price",
             "Min_x0020_Price",
             "Min Price",
             "Min_Price",
             "min price",
+            "Min Price (Rs./Quintal)",
+            "min price (rs./quintal)",
         ],
         "max_price": [
             "max_price",
@@ -36,6 +38,8 @@ class ScoutAgent:
             "Max Price",
             "Max_Price",
             "max price",
+            "Max Price (Rs./Quintal)",
+            "max price (rs./quintal)",
         ],
         "modal_price": [
             "modal_price",
@@ -43,8 +47,10 @@ class ScoutAgent:
             "Modal Price",
             "Modal_Price",
             "modal price",
+            "Modal Price (Rs./Quintal)",
+            "modal price (rs./quintal)",
         ],
-        "district": ["district", "District"],
+        "district": ["district", "District", "District Name", "district name", "district_name"],
     }
 
     def __init__(self, env_path: Optional[Union[str, Path]] = None) -> None:
@@ -208,13 +214,24 @@ class ScoutAgent:
         project_root = Path(__file__).resolve().parent.parent.parent
         data_dir = project_root / "data"
 
-        csv_files = list(data_dir.rglob("*.csv")) if data_dir.exists() else []
-        if not csv_files:
-            raise FileNotFoundError(f"Fallback CSV dataset directory not found or empty at '{data_dir}'.")
+        if not data_dir.exists():
+            raise FileNotFoundError(f"Data directory not found at '{data_dir}'.")
 
         target_state = state.strip().lower()
         target_commodity = commodity.strip().lower()
         matched_records: List[Dict[str, Any]] = []
+
+        # 1. Prioritize targeted crop CSV in data/data_vegetable_wise/
+        csv_files: List[Path] = []
+        veg_dir = data_dir / "data_vegetable_wise"
+        if veg_dir.exists():
+            for p in veg_dir.glob("*.csv"):
+                if target_commodity and target_commodity in p.stem.lower():
+                    csv_files.append(p)
+
+        # 2. Add root data/*.csv files
+        for p in data_dir.glob("*.csv"):
+            csv_files.append(p)
 
         for csv_path in csv_files:
             try:
@@ -222,12 +239,13 @@ class ScoutAgent:
                     reader = csv.DictReader(f)
                     for row in reader:
                         row_state = str(self._get_field_value(row, "state") or "").strip().lower()
-                        row_commodity = (
-                            str(self._get_field_value(row, "commodity") or "").strip().lower()
-                        )
+                        extracted_comm = self._get_field_value(row, "commodity")
+                        if not extracted_comm and "data_vegetable_wise" in str(csv_path):
+                            extracted_comm = csv_path.stem
+                        row_commodity = str(extracted_comm or "").strip().lower()
 
-                        state_match = target_state in row_state or row_state in target_state
-                        commodity_match = target_commodity in row_commodity or row_commodity in target_commodity
+                        state_match = bool(row_state) and (target_state in row_state or row_state in target_state)
+                        commodity_match = bool(row_commodity) and (target_commodity in row_commodity or row_commodity in target_commodity)
 
                         if state_match and commodity_match:
                             market = self._get_field_value(row, "market") or "N/A"
@@ -242,7 +260,7 @@ class ScoutAgent:
                                 self._get_field_value(row, "modal_price")
                             )
                             st_val = self._get_field_value(row, "state") or state
-                            cm_val = self._get_field_value(row, "commodity") or commodity
+                            cm_val = self._get_field_value(row, "commodity") or (csv_path.stem if "data_vegetable_wise" in str(csv_path) else commodity)
 
                             matched_records.append(
                                 {
@@ -257,29 +275,14 @@ class ScoutAgent:
                                     "modal_price": modal_price,
                                 }
                             )
-                            if len(matched_records) >= 10:
+                            if len(matched_records) >= 30:
                                 break
+                    if len(matched_records) >= 30:
+                        break
             except Exception as exc:
                 print(f"[LOG] Error reading fallback CSV '{csv_path.name}': {exc}")
-
-        # Dynamic template fallback if CSV has no exact matches for state+commodity combo
-        if not matched_records:
-            base_price = 2400 if "wheat" in target_commodity else (3200 if "onion" in target_commodity else 2200)
-            matched_records = [
-                {
-                    "market_name": f"{state} APMC",
-                    "state": state,
-                    "district": state,
-                    "commodity": commodity,
-                    "variety": "Local",
-                    "arrival_date": "22/08/2026",
-                    "min_price": base_price - 200,
-                    "max_price": base_price + 300,
-                    "modal_price": base_price,
-                }
-            ]
-
         return matched_records
+
 
 
 if __name__ == "__main__":

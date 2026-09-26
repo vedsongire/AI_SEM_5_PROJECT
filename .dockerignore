@@ -1,0 +1,31 @@
+# Git & IDE configurations
+.git
+.gitignore
+.agents
+.vscode
+.idea
+
+# Python virtual environment & cache
+.venv
+venv
+env
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Temporary files & notebooks
+scratch
+notebooks
+evaluation_results
+*.log
+.pytest_cache
+.coverage
+htmlcov
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Heavy local data (mounted as live volume via docker-compose instead of bloating image)
+data/data_vegetable_wise

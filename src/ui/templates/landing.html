@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="hi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K.I.S.A.N. AI | जय जवान, जय किसान • Dedicated to India's Annadatas</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@500;600;700;800;900&family=Rozha+One&family=Tiro+Devanagari+Hindi:ital@0;1&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Poppins', 'sans-serif'],
+                        devanagari: ['"Rozha One"', '"Tiro Devanagari Hindi"', 'serif'],
+                        hindi: ['"Tiro Devanagari Hindi"', 'sans-serif'],
+                    },
+                    colors: {
+                        agri: {
+                            gold: '#fbbf24',
+                            amber: '#f59e0b',
+                            saffron: '#ff7722',
+                            green: '#15803d',
+                            emerald: '#10b981',
+                            dark: '#070d18',
+                            navy: '#0b1526',
+                            card: '#101c33',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #070d18;
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+
+        /* Scroll Progress Bar */
+        #scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3.5px;
+            background: linear-gradient(90deg, #ff7722 0%, #ffffff 50%, #10b981 100%);
+            z-index: 100;
+            width: 0%;
+            transition: width 0.1s ease-out;
+            box-shadow: 0 0 10px rgba(255, 119, 34, 0.6);
+        }
+
+        /* Glassmorphism Classes */
+        .glass-card {
+            background: rgba(16, 28, 51, 0.78);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(245, 158, 11, 0.35);
+            transform: translateY(-4px);
+            box-shadow: 0 25px 50px -12px rgba(245, 158, 11, 0.15);
+        }
+
+        .glass-nav {
+            background: rgba(7, 13, 24, 0.90);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Hero Background with User-Provided Artwork (Elderly Farmer Showering Golden Grains in Sunset) */
+        .hero-background {
+            background-image: 
+                linear-gradient(180deg, rgba(7, 13, 24, 0.42) 0%, rgba(7, 13, 24, 0.72) 55%, #070d18 100%),
+                url('/static/images/landing_bg.png');
+            background-repeat: no-repeat;
+            background-position: center 20%;
+            background-size: cover;
+            background-attachment: fixed;
+        }
+
+        /* Tricolor Gradient Text */
+        .tricolor-gradient {
+            background: linear-gradient(90deg, #ff8c00 0%, #ffffff 48%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .gold-gradient-text {
+            background: linear-gradient(90deg, #fcd34d 0%, #f59e0b 50%, #f97316 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Pulsing Glow Animation */
+        @keyframes hero-pulse {
+            0% {
+                box-shadow: 0 0 25px rgba(245, 158, 11, 0.4), 0 0 60px rgba(16, 185, 129, 0.2);
+            }
+            50% {
+                box-shadow: 0 0 45px rgba(245, 158, 11, 0.65), 0 0 90px rgba(16, 185, 129, 0.4);
+            }
+            100% {
+                box-shadow: 0 0 25px rgba(245, 158, 11, 0.4), 0 0 60px rgba(16, 185, 129, 0.2);
+            }
+        }
+
+        .btn-glowing {
+            animation: hero-pulse 3s infinite;
+        }
+
+        /* Ornate photo frame */
+        .portrait-frame {
+            position: relative;
+            border-radius: 1.25rem;
+            padding: 8px;
+            background: linear-gradient(135deg, #ff7722, #ffffff, #10b981);
+            box-shadow: 0 15px 35px -5px rgba(255, 119, 34, 0.35);
+        }
+
+        .portrait-frame img {
+            border-radius: 1rem;
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            filter: contrast(1.05) brightness(1.02);
+        }
+
+        /* Scroll Reveal Effect */
+        .reveal-on-scroll {
+            opacity: 0;
+            transform: translateY(35px);
+            transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal-on-scroll.is-revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Back to top button */
+        #back-to-top {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 45;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
+
+        #back-to-top.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        /* Range Slider Styling */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #f59e0b;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.7);
+            cursor: pointer;
+            border: 2px solid #ffffff;
+        }
+    </style>
+</head>
+<body class="selection:bg-amber-500 selection:text-black">
+
+    <!-- Scroll Progress Indicator Bar -->
+    <div id="scroll-progress"></div>
+
+    <!-- Floating Back to Top Button -->
+    <button 
+        id="back-to-top" 
+        onclick="window.scrollTo({top: 0, behavior: 'smooth'})"
+        class="w-12 h-12 rounded-full bg-gradient-to-tr from-amber-500 to-emerald-500 text-slate-950 flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-transform border border-white/20 cursor-pointer"
+        title="वापस ऊपर जाएं / Back to top"
+    >
+        <i class="fa-solid fa-arrow-up font-black text-lg"></i>
+    </button>
+
+    <!-- =================================================================== -->
+    <!-- 1. TOP STICKY NAVIGATION BAR WITH BILINGUAL TOGGLE -->
+    <!-- =================================================================== -->
+    <header class="sticky top-0 z-50 glass-nav px-4 md:px-8 py-3.5 transition-all">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="/" class="flex items-center space-x-3 group">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-amber-600 via-emerald-600 to-emerald-400 flex items-center justify-center text-white text-2xl shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
+                    🌾
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xl md:text-2xl font-black text-white tracking-tight">K.I.S.A.N. AI</span>
+                        <span 
+                            class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                            data-i18n="badge_mission"
+                        >जन-समर्पित</span>
+                    </div>
+                    <p class="text-[11px] text-emerald-400 font-medium tracking-wide" data-i18n="tagline">अन्नदाता देवो भव: • Fair Price Discovery</p>
+                </div>
+            </a>
+
+            <!-- Navigation Links -->
+            <nav class="hidden lg:flex items-center space-x-6 text-sm font-semibold text-slate-300">
+                <a href="#tribute" class="hover:text-amber-400 transition-colors flex items-center space-x-1.5">
+                    <i class="fa-solid fa-monument text-amber-500 text-xs"></i>
+                    <span data-i18n="nav_tribute">शास्त्री जी संदेश</span>
+                </a>
+                <a href="#crisis" class="hover:text-rose-400 transition-colors flex items-center space-x-1.5">
+                    <i class="fa-solid fa-triangle-exclamation text-rose-500 text-xs"></i>
+                    <span data-i18n="nav_crisis">किसान संकट आंकड़े</span>
+                </a>
+                <a href="#about" class="hover:text-emerald-400 transition-colors flex items-center space-x-1.5">
+                    <i class="fa-solid fa-seedling text-emerald-500 text-xs"></i>
+                    <span data-i18n="nav_mission">हमारा संकल्प</span>
+                </a>
+                <a href="#profit-calculator" class="hover:text-amber-400 transition-colors flex items-center space-x-1.5">
+                    <i class="fa-solid fa-calculator text-amber-500 text-xs"></i>
+                    <span data-i18n="nav_calculator">मुनाफा कैलकुलेटर</span>
+                </a>
+            </nav>
+
+            <!-- Action Controls (Language Toggle, Slogan Voice & Portal Link) -->
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                
+                <!-- BILINGUAL LANGUAGE TOGGLE BUTTON -->
+                <button 
+                    id="langToggleBtn"
+                    type="button"
+                    onclick="toggleAppLanguage()"
+                    class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-black text-white bg-slate-800/90 hover:bg-slate-700 border border-amber-500/40 shadow-sm transition-all cursor-pointer"
+                    title="भाषा बदलें / Change Language"
+                >
+                    <i class="fa-solid fa-language text-amber-400 text-sm"></i>
+                    <span id="langDisplayLabel" class="tracking-wide">🇮🇳 हिंदी | English</span>
+                </button>
+
+                <button 
+                    onclick="speakSlogan()"
+                    class="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-all cursor-pointer"
+                    title="नारा सुनें / Listen Slogan"
+                >
+                    <i class="fa-solid fa-volume-high text-amber-400 animate-pulse"></i>
+                    <span data-i18n="btn_listen_slogan">सुनें नारा</span>
+                </button>
+
+                <!-- MAIN NAVIGATION BUTTON TO CURRENT MAIN PAGE -->
+                <a 
+                    href="/dashboard"
+                    class="inline-flex items-center space-x-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-extrabold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-emerald-400 hover:from-amber-300 hover:to-emerald-300 shadow-lg shadow-amber-500/30 transform hover:scale-105 active:scale-95 transition-all cursor-pointer border border-amber-200"
+                >
+                    <span data-i18n="btn_launch_platform">किसान मंच शुरू करें</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+
+    <!-- =================================================================== -->
+    <!-- 2. HERO SECTION WITH PARALLAX SCROLL EFFECT & BACKGROUND IMAGE -->
+    <!-- =================================================================== -->
+    <section id="hero" class="relative min-h-[92vh] flex items-center justify-center hero-background px-4 md:px-8 py-16 lg:py-24 overflow-hidden">
+        <div class="relative z-10 max-w-5xl mx-auto text-center flex flex-col items-center">
+            
+            <!-- Patriotic Ribbon Badge -->
+            <div class="reveal-on-scroll inline-flex items-center space-x-2.5 px-4 py-1.5 rounded-full bg-slate-900/80 border border-amber-500/40 backdrop-blur-md shadow-xl mb-6">
+                <span class="flex h-2 w-2 relative">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                </span>
+                <span class="text-xs md:text-sm font-extrabold tracking-wide uppercase tricolor-gradient" data-i18n="hero_ribbon">
+                    भारत के किसानों के स्वाभिमान व न्याय को समर्पित
+                </span>
+            </div>
+
+            <!-- The Historic Slogan: JAI JAWAN, JAI KISAN -->
+            <div class="reveal-on-scroll mb-4">
+                <h1 class="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black font-devanagari tracking-tight tricolor-gradient drop-shadow-2xl leading-tight">
+                    "जय जवान, जय किसान"
+                </h1>
+                <p class="text-lg sm:text-2xl md:text-3xl font-extrabold text-amber-300 font-heading tracking-wide mt-2 drop-shadow-md">
+                    "Hail The Soldier, Hail The Farmer"
+                </p>
+            </div>
+
+            <!-- Historical Attribution -->
+            <p class="reveal-on-scroll text-sm md:text-base font-semibold text-slate-300 max-w-2xl mb-8 leading-relaxed" data-i18n="hero_attribution">
+                — पूर्व प्रधानमंत्री <span class="text-amber-400 font-bold">भारत रत्न श्री लाल बहादुर शास्त्री जी</span> द्वारा दिया गया अमर राष्ट्र-मंत्र
+            </p>
+
+            <!-- Mission Headline Card -->
+            <div class="reveal-on-scroll max-w-3xl glass-card rounded-2xl p-6 md:p-8 mb-10 border border-amber-500/20">
+                <h2 class="text-xl sm:text-2xl md:text-3xl font-black text-white mb-3" data-i18n="hero_card_title">
+                    हर फसल का सही दाम • बिचौलियों के शोषण से मुक्ति
+                </h2>
+                <p class="text-slate-300 text-sm md:text-base leading-relaxed" data-i18n="hero_card_desc">
+                    हर साल हजारों किसान अपनी मेहनत का सही मूल्य न मिलने के कारण आर्थिक संकट में डूब जाते हैं। 
+                    K.I.S.A.N. AI एक गैर-व्यावसायिक, अत्याधुनिक AI पहल है जो सीधे किसान के फोन पर निकटवर्ती व प्रादेशिक मंडियों की वास्तविक कीमतें, OSRM हाईवे भाड़ा और शुद्ध जेब लाभ (Net Profit) उपलब्ध कराती है।
+                </p>
+            </div>
+
+            <!-- Primary CTAs -->
+            <div class="reveal-on-scroll flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md">
+                <!-- THE NAVIGATION BUTTON TO CURRENT MAIN PAGE -->
+                <a 
+                    href="/dashboard" 
+                    id="enter-portal-hero-btn"
+                    class="btn-glowing w-full sm:w-auto flex-1 inline-flex items-center justify-center space-x-3 px-8 py-4 rounded-xl text-base md:text-lg font-black text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-emerald-400 hover:from-amber-300 hover:to-emerald-300 shadow-2xl transition-all transform hover:-translate-y-1 active:translate-y-0 cursor-pointer border-2 border-amber-200"
+                >
+                    <span data-i18n="btn_enter_portal">पोर्टल में प्रवेश करें (Enter Platform)</span>
+                    <i class="fa-solid fa-arrow-right text-sm"></i>
+                </a>
+
+                <a 
+                    href="#crisis" 
+                    class="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-6 py-4 rounded-xl text-base font-bold text-slate-200 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/60 backdrop-blur-md transition-all hover:text-white"
+                >
+                    <i class="fa-solid fa-heart-pulse text-rose-400"></i>
+                    <span data-i18n="btn_understand_crisis">किसान संकट आंकड़े देखें</span>
+                </a>
+            </div>
+
+            <!-- Trust Stats Strip -->
+            <div class="reveal-on-scroll grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 w-full max-w-4xl text-left">
+                <div class="glass-card rounded-xl p-4 border border-white/5">
+                    <p class="text-2xl font-black text-amber-400">100% Free</p>
+                    <p class="text-xs text-slate-400 font-medium" data-i18n="stat_free">किसानों के लिए पूर्णतः नि:शुल्क</p>
+                </div>
+                <div class="glass-card rounded-xl p-4 border border-white/5">
+                    <p class="text-2xl font-black text-emerald-400">2,500+</p>
+                    <p class="text-xs text-slate-400 font-medium" data-i18n="stat_mandis">अखिल भारतीय APMC मंडियां</p>
+                </div>
+                <div class="glass-card rounded-xl p-4 border border-white/5">
+                    <p class="text-2xl font-black text-amber-400">0%</p>
+                    <p class="text-xs text-slate-400 font-medium" data-i18n="stat_comm">शून्य दलाली या कमीशन</p>
+                </div>
+                <div class="glass-card rounded-xl p-4 border border-white/5">
+                    <p class="text-2xl font-black text-emerald-400">Hindi Voice</p>
+                    <p class="text-xs text-slate-400 font-medium" data-i18n="stat_voice">बोलकर पूछें, सुनकर समझें</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- =================================================================== -->
+    <!-- 3. TRIBUTE SECTION: LAL BAHADUR SHASTRI JI & HIS ETERNAL SLOGAN -->
+    <!-- =================================================================== -->
+    <section id="tribute" class="py-20 px-4 md:px-8 bg-slate-950/80 border-t border-b border-amber-500/10 relative">
+        <div class="max-w-6xl mx-auto">
+            
+            <div class="reveal-on-scroll text-center max-w-3xl mx-auto mb-16">
+                <span class="text-xs font-black uppercase tracking-widest text-amber-400 bg-amber-500/10 px-3.5 py-1.5 rounded-full border border-amber-500/30" data-i18n="tribute_badge">
+                    ऐतिहासिक प्रेरणा • Historic Heritage
+                </span>
+                <h2 class="text-3xl md:text-5xl font-black font-devanagari text-white mt-4" data-i18n="tribute_title">
+                    शास्त्री जी का संदेश: किसान ही देश की रीढ़ है
+                </h2>
+                <div class="w-24 h-1.5 bg-gradient-to-r from-amber-500 to-emerald-500 mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                
+                <!-- Left: Shastri Ji Photo (User-Attached Image) -->
+                <div class="reveal-on-scroll lg:col-span-5 flex flex-col items-center">
+                    <div class="portrait-frame max-w-xs sm:max-w-sm w-full">
+                        <img 
+                            src="/static/images/lal_bahadur_shastri.png" 
+                            alt="Bharat Ratna Shri Lal Bahadur Shastri" 
+                            class="shadow-2xl"
+                            loading="lazy"
+                        >
+                    </div>
+                    <div class="mt-4 text-center">
+                        <h3 class="text-xl font-black text-white" data-i18n="shastri_name">भारत रत्न श्री लाल बहादुर शास्त्री</h3>
+                        <p class="text-xs font-bold text-amber-400 uppercase tracking-wider" data-i18n="shastri_title">भारत के द्वितीय प्रधानमंत्री (1904 – 1966)</p>
+                        <p class="text-xs text-slate-400 mt-1" data-i18n="shastri_venue">उद्घोषक: "जय जवान, जय किसान" (1965, रामलीला मैदान, दिल्ली)</p>
+                    </div>
+                </div>
+
+                <!-- Right: Historical Significance & Legacy -->
+                <div class="reveal-on-scroll lg:col-span-7 space-y-6">
+                    <div class="glass-card rounded-2xl p-6 md:p-8 border-l-4 border-l-amber-500">
+                        <i class="fa-solid fa-quote-left text-3xl text-amber-400/40 mb-3 block"></i>
+                        <p class="text-lg md:text-xl font-serif italic text-slate-200 leading-relaxed font-devanagari" data-i18n="shastri_quote">
+                            "देश की स्वतंत्रता की रक्षा केवल सैनिकों का काम नहीं है, पूरे देश को मजबूत होना पड़ेगा। 
+                            खेतों में काम करने वाला हमारा किसान भी सीमा पर खड़े सैनिक की तरह देश की आजादी का रक्षक है।"
+                        </p>
+                        <p class="text-xs text-amber-400 font-bold uppercase tracking-wider mt-3">— लाल बहादुर शास्त्री जी</p>
+                    </div>
+
+                    <div class="space-y-4 text-slate-300 text-sm md:text-base leading-relaxed">
+                        <p data-i18n="shastri_hist_1">
+                            अक्टूबर 1965 में जब भारत एक तरफ सीमा पर युद्ध और दूसरी ओर देश में गंभीर अन्न संकट से जूझ रहा था, 
+                            तब शास्त्री जी ने यह ऐतिहासिक उद्घोष देकर देश को स्मरण कराया कि <strong>किसान किसी सैनिक से कम नहीं है</strong>।
+                        </p>
+                        <p data-i18n="shastri_hist_2">
+                            शास्त्री जी ने केवल नारा नहीं दिया, बल्कि भारत में <strong>कृषि मूल्य आयोग (Agricultural Prices Commission - वर्तमान CACP)</strong> 
+                            और <strong>राष्ट्रीय डेयरी विकास बोर्ड (NDDB)</strong> की स्थापना की नींव रखी, ताकि किसानों को उनकी उपज का न्यूनतम समर्थन मूल्य मिले।
+                        </p>
+                        <div class="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/30 flex items-start space-x-3">
+                            <i class="fa-solid fa-hand-holding-heart text-emerald-400 text-xl mt-1"></i>
+                            <div>
+                                <h4 class="text-sm font-bold text-white" data-i18n="shastri_res_title">21वीं सदी में शास्त्री जी के संकल्प को गति</h4>
+                                <p class="text-xs text-emerald-200/90 mt-1" data-i18n="shastri_res_desc">
+                                    आज K.I.S.A.N. AI आधुनिक आर्टिफिशियल इंटेलिजेंस और रियल-टाइम डेटा के माध्यम से शास्त्री जी के उसी सपने को साकार करने का प्रयास कर रहा है — जहां किसान किसी दलाल का मोहताज न रहे।
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- =================================================================== -->
+    <!-- 4. THE AGRARIAN CRISIS & FARMER SUICIDE DATA (STATISTICS) -->
+    <!-- =================================================================== -->
+    <section id="crisis" class="py-20 px-4 md:px-8 bg-[#09101d] relative">
+        <div class="max-w-6xl mx-auto">
+            
+            <div class="reveal-on-scroll text-center max-w-3xl mx-auto mb-16">
+                <span class="text-xs font-black uppercase tracking-widest text-rose-400 bg-rose-500/10 px-3.5 py-1.5 rounded-full border border-rose-500/30" data-i18n="crisis_badge">
+                    कड़वा सच और आंकड़े • The Tragic Reality
+                </span>
+                <h2 class="text-3xl md:text-5xl font-black font-devanagari text-white mt-4" data-i18n="crisis_title">
+                    फसल का सही दाम न मिलना: एक मानवीय त्रासदी
+                </h2>
+                <p class="text-slate-400 text-sm md:text-base mt-3" data-i18n="crisis_subtitle">
+                    राष्ट्रीय अपराध रिकॉर्ड ब्यूरो (NCRB - ADSI Report) के आधिकारिक आंकड़े बताते हैं कि भारत का किसान किन विषम परिस्थितियों में जीने को विवश है।
+                </p>
+                <div class="w-24 h-1.5 bg-gradient-to-r from-rose-500 to-amber-500 mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <!-- Hard Hitting Stat Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+                
+                <div class="reveal-on-scroll glass-card rounded-2xl p-6 border-t-4 border-t-rose-500 relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 text-7xl text-rose-500/10 font-black">
+                        <i class="fa-solid fa-ribbon"></i>
+                    </div>
+                    <p class="text-xs font-bold uppercase tracking-wider text-rose-400" data-i18n="card_stat_1_title">वार्षिक आत्महत्याएं</p>
+                    <p class="text-4xl md:text-5xl font-black text-white mt-2">11,290+</p>
+                    <p class="text-xs text-slate-300 mt-2 leading-relaxed" data-i18n="card_stat_1_desc">
+                        हर साल भारत में औसतन 11,290 से अधिक किसान एवं खेतिहर मजदूर आत्महत्या करने पर विवश होते हैं (लगभग 31 मौतें प्रतिदिन)।
+                    </p>
+                    <span class="inline-block mt-3 text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded" data-i18n="src_ncrb">स्रोत: NCRB ADSI रिपोर्ट</span>
+                </div>
+
+                <div class="reveal-on-scroll glass-card rounded-2xl p-6 border-t-4 border-t-amber-500 relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 text-7xl text-amber-500/10 font-black">
+                        <i class="fa-solid fa-calendar-xmark"></i>
+                    </div>
+                    <p class="text-xs font-bold uppercase tracking-wider text-amber-400" data-i18n="card_stat_2_title">विगत दशक का दर्द</p>
+                    <p class="text-4xl md:text-5xl font-black text-white mt-2">1,00,000+</p>
+                    <p class="text-xs text-slate-300 mt-2 leading-relaxed" data-i18n="card_stat_2_desc">
+                        पिछले 10 वर्षों में एक लाख से अधिक अन्नदाताओं ने कर्ज, फसल विफलता और कौड़ियों के भाव बिकती उपज के चलते अपनी जान गंवाई।
+                    </p>
+                    <span class="inline-block mt-3 text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded" data-i18n="src_min">कृषि मंत्रालय व NCRB सांख्यिकी</span>
+                </div>
+
+                <div class="reveal-on-scroll glass-card rounded-2xl p-6 border-t-4 border-t-red-500 relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 text-7xl text-red-500/10 font-black">
+                        <i class="fa-solid fa-coins"></i>
+                    </div>
+                    <p class="text-xs font-bold uppercase tracking-wider text-red-400">Distress Selling</p>
+                    <p class="text-4xl md:text-5xl font-black text-white mt-2">₹1 - ₹2 <span class="text-xl">/ किग्रा</span></p>
+                    <p class="text-xs text-slate-300 mt-2 leading-relaxed" data-i18n="card_stat_3_desc">
+                        स्थानीय मंडियों में अचानक आवक बढ़ने पर प्याज, टमाटर व आलू जैसी फसलें ₹1-₹2/किलो में बिकती हैं, जबकि शहरों में ग्राहक ₹30-₹50 चुकाते हैं।
+                    </p>
+                    <span class="inline-block mt-3 text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded" data-i18n="src_mkt">मंडी आवक मूल्य अंतर</span>
+                </div>
+
+                <div class="reveal-on-scroll glass-card rounded-2xl p-6 border-t-4 border-t-emerald-500 relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 text-7xl text-emerald-500/10 font-black">
+                        <i class="fa-solid fa-scale-unbalanced-flip"></i>
+                    </div>
+                    <p class="text-xs font-bold uppercase tracking-wider text-emerald-400" data-i18n="card_stat_4_title">दलालों का मुनाफा</p>
+                    <p class="text-4xl md:text-5xl font-black text-white mt-2">60% - 75%</p>
+                    <p class="text-xs text-slate-300 mt-2 leading-relaxed" data-i18n="card_stat_4_desc">
+                        उपभोक्ता द्वारा दिए गए कुल मूल्य का 60 से 75 प्रतिशत हिस्सा आढ़तिए, बिचौलिए और सिंडिकेट अपनी जेब में रख लेते हैं।
+                    </p>
+                    <span class="inline-block mt-3 text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded" data-i18n="src_eco">कृषि अर्थशास्त्र अध्ययन</span>
+                </div>
+
+            </div>
+
+            <!-- Deep Dive: The 4 Causes of Agrarian Distress -->
+            <div class="reveal-on-scroll glass-card rounded-2xl p-8 border border-slate-700/60">
+                <h3 class="text-xl md:text-2xl font-black text-white mb-6 flex items-center space-x-3">
+                    <i class="fa-solid fa-circle-exclamation text-rose-500"></i>
+                    <span data-i18n="causes_heading">किसान के संकट के मुख्य कारण (Root Causes of Distress)</span>
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="flex space-x-4">
+                        <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 text-lg font-black">1</div>
+                        <div>
+                            <h4 class="text-base font-bold text-white" data-i18n="cause_1_title">फसल का नगण्य मूल्य (Distress Selling)</h4>
+                            <p class="text-xs md:text-sm text-slate-300 mt-1 leading-relaxed" data-i18n="cause_1_desc">
+                                फसल कटाई के तुरंत बाद जब किसान स्थानीय उप-मंडी में पहुंचता है, तो भारी आवक बताकर व्यापारी दाम गिरा देते हैं। भंडारण क्षमता न होने के कारण किसान लागत से भी कम भाव पर बेचने को मजबूर हो जाता है।
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-4">
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 text-lg font-black">2</div>
+                        <div>
+                            <h4 class="text-base font-bold text-white" data-i18n="cause_2_title">बिचौलियों और आढ़तियों का चंगुल (Middlemen Cartel)</h4>
+                            <p class="text-xs md:text-sm text-slate-300 mt-1 leading-relaxed" data-i18n="cause_2_desc">
+                                खाद-बीज के लिए दिया गया अनौपचारिक कर्ज किसान के हाथ बांध देता है। आढ़तिए तय करते हैं कि किसान किसे और किस भाव पर बेचेगा, जिससे उसका शोषण पीढ़ी-दर-पीढ़ी चलता रहता है।
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-4">
+                        <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 text-lg font-black">3</div>
+                        <div>
+                            <h4 class="text-base font-bold text-white" data-i18n="cause_3_title">बाजार सूचना का अभाव (Information Asymmetry)</h4>
+                            <p class="text-xs md:text-sm text-slate-300 mt-1 leading-relaxed" data-i18n="cause_3_desc">
+                                किसान को यह ज्ञात ही नहीं होता कि उसकी तहसील से मात्र 40-50 किमी दूर स्थित दूसरी मंडी या महानगर टर्मिनल में उसी फसल का भाव 30% से 50% अधिक चल रहा है।
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-4">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 text-lg font-black">4</div>
+                        <div>
+                            <h4 class="text-base font-bold text-white" data-i18n="cause_4_title">परिवहन व भाड़े का अनिश्चित जोखिम (Logistics Fear)</h4>
+                            <p class="text-xs md:text-sm text-slate-300 mt-1 leading-relaxed" data-i18n="cause_4_desc">
+                                किसान दूर की मंडी जाने से इसलिए डरता है क्योंकि उसे नहीं पता होता कि ट्रक या पिकअप का डीजल व किराया कटने के बाद वास्तव में उसकी जेब में क्या बचेगा (Net In-Pocket Profit)।
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- =================================================================== -->
+    <!-- 5. ABOUT SECTION & FARMER SHOWCASE -->
+    <!-- =================================================================== -->
+    <section id="about" class="py-20 px-4 md:px-8 bg-slate-950 relative">
+        <div class="max-w-6xl mx-auto">
+            
+            <div class="reveal-on-scroll text-center max-w-3xl mx-auto mb-16">
+                <span class="text-xs font-black uppercase tracking-widest text-emerald-400 bg-emerald-500/10 px-3.5 py-1.5 rounded-full border border-emerald-500/30" data-i18n="mission_badge">
+                    हमारा संकल्प • Mission Statement
+                </span>
+                <h2 class="text-3xl md:text-5xl font-black font-devanagari text-white mt-4" data-i18n="mission_title">
+                    K.I.S.A.N. AI: किसान की आर्थिक सुरक्षा की ढाल
+                </h2>
+                <p class="text-slate-400 text-sm md:text-base mt-3" data-i18n="mission_subtitle">
+                    हमारा उद्देश्य भारत के हर किसान को बिचौलियों के शिकंजे से मुक्त कर, पारदर्शी डेटा और कृत्रिम बुद्धिमत्ता (AI) की शक्ति देना है।
+                </p>
+                <div class="w-24 h-1.5 bg-gradient-to-r from-emerald-500 to-amber-500 mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <!-- How We Solve It: 4 Pillars -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+                
+                <!-- Scout Agent -->
+                <div class="reveal-on-scroll glass-card rounded-2xl p-6 border border-emerald-500/20 hover:border-emerald-500/50">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl mb-4">
+                        <i class="fa-solid fa-satellite-dish"></i>
+                    </div>
+                    <h3 class="text-lg font-black text-white" data-i18n="agent_1_title">1. स्काउट एजेंट (Scout)</h3>
+                    <p class="text-xs text-emerald-300 font-bold uppercase mt-1" data-i18n="agent_1_sub">व्यापक मंडी खोज</p>
+                    <p class="text-xs text-slate-300 mt-3 leading-relaxed" data-i18n="agent_1_desc">
+                        किसान के जिले व आसपास के 150 किमी के दायरे में सभी सक्रिय APMC मंडियों की वास्तविक दैनिक आवक व दरों का विश्लेषण करता है।
+                    </p>
+                </div>
+
+                <!-- Predictor Agent -->
+                <div class="reveal-on-scroll glass-card rounded-2xl p-6 border border-amber-500/20 hover:border-amber-500/50">
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl mb-4">
+                        <i class="fa-solid fa-brain"></i>
+                    </div>
+                    <h3 class="text-lg font-black text-white" data-i18n="agent_2_title">2. प्रेडिक्टर एजेंट (ML)</h3>
+                    <p class="text-xs text-amber-300 font-bold uppercase mt-1" data-i18n="agent_2_sub">सटीक मूल्य पूर्वानुमान</p>
+                    <p class="text-xs text-slate-300 mt-3 leading-relaxed" data-i18n="agent_2_desc">
+                        ट्रेंड ML मॉडल द्वारा P10 (न्यूनतम सुरक्षा तल), P50 (अपेक्षित भाव) और P90 (सर्वोत्तम भाव) की गणना करता है, ताकि किसान को कोई गुमराह न कर सके।
+                    </p>
+                </div>
+
+                <!-- Planner Agent -->
+                <div class="reveal-on-scroll glass-card rounded-2xl p-6 border border-blue-500/20 hover:border-blue-500/50">
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-2xl mb-4">
+                        <i class="fa-solid fa-truck-fast"></i>
+                    </div>
+                    <h3 class="text-lg font-black text-white" data-i18n="agent_3_title">3. प्लानर एजेंट (Logistics)</h3>
+                    <p class="text-xs text-blue-300 font-bold uppercase mt-1" data-i18n="agent_3_sub">भाड़ा व शुद्ध जेब लाभ</p>
+                    <p class="text-xs text-slate-300 mt-3 leading-relaxed" data-i18n="agent_3_desc">
+                        OSRM रोड रूट, लाइव डीजल दर और सही वाहन (बोलेरो/8-टन/20-टन) तय कर यह गारंटीकृत हिसाब देता है कि पेट्रोल-भाड़ा कटने के बाद जेब में कितना शुद्ध मुनाफा बचेगा।
+                    </p>
+                </div>
+
+                <!-- Voice Agent -->
+                <div class="reveal-on-scroll glass-card rounded-2xl p-6 border border-purple-500/20 hover:border-purple-500/50">
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-2xl mb-4">
+                        <i class="fa-solid fa-microphone-lines"></i>
+                    </div>
+                    <h3 class="text-lg font-black text-white" data-i18n="agent_4_title">4. वॉइस एजेंट (Voice AI)</h3>
+                    <p class="text-xs text-purple-300 font-bold uppercase mt-1" data-i18n="agent_4_sub">सहज देसी आवाज</p>
+                    <p class="text-xs text-slate-300 mt-3 leading-relaxed" data-i18n="agent_4_desc">
+                        किसान को टाइप करने की जरूरत नहीं। वह शुद्ध हिंदी या स्थानीय बोली में बोलकर सवाल पूछ सकता है और AI आवाज में उत्तर सुन सकता है।
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- Farmer Showcase (Featuring User's 4 Authentic Farmer Photos) -->
+            <div class="reveal-on-scroll mb-16">
+                <div class="text-center mb-8">
+                    <h3 class="text-xl md:text-2xl font-black text-white" data-i18n="farmers_showcase_title">
+                        धरती के अन्नदाताओं का अटूट श्रम • Pride of Our Soil
+                    </h3>
+                    <p class="text-slate-400 text-xs md:text-sm mt-1" data-i18n="farmers_showcase_sub">
+                        कठिन जुताई से लेकर लहलहाती फसल तक — हर किसान परिवार की मेहनत ही राष्ट्र का जीवन है
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Photo 1: Plowing with Ox -->
+                    <div class="glass-card rounded-2xl overflow-hidden border border-white/10 group flex flex-col">
+                        <div class="h-52 overflow-hidden bg-slate-900 relative">
+                            <img src="/static/images/farmer_plowing_ox.png" alt="Farmer plowing field with bullock" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy">
+                            <span class="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/90 text-slate-950 shadow-md" data-i18n="photo_1_badge">
+                                🐂 कठिन जुताई
+                            </span>
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col justify-between">
+                            <div>
+                                <h4 class="text-base font-bold text-white" data-i18n="photo_1_title">हल-बैल की अटूट साधना</h4>
+                                <p class="text-xs text-amber-300/90 font-medium mt-0.5" data-i18n="photo_1_loc">रमेश पाटिल • जालना, महाराष्ट्र</p>
+                                <p class="text-xs text-slate-300 mt-2.5 leading-relaxed" data-i18n="photo_1_desc">
+                                    "कड़कती धूप में पसीना बहाकर पथरीली धरती को उपजाऊ बनाने वाले अन्नदाता की मेहनत का हर पैसा उसकी जेब में सुरक्षित होना चाहिए।"
+                                </p>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+                                <span>भूमि तैयारी व बुवाई</span>
+                                <span class="text-emerald-400 font-bold">100% निष्पक्ष</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Photo 2: Paddy Planting -->
+                    <div class="glass-card rounded-2xl overflow-hidden border border-white/10 group flex flex-col">
+                        <div class="h-52 overflow-hidden bg-slate-900 relative">
+                            <img src="/static/images/farmer_paddy_planting.png" alt="Farmer tossing paddy seedlings in flooded field" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy">
+                            <span class="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/90 text-slate-950 shadow-md" data-i18n="photo_2_badge">
+                                🌱 धान रोपाई
+                            </span>
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col justify-between">
+                            <div>
+                                <h4 class="text-base font-bold text-white" data-i18n="photo_2_title">वर्षा की पहली फुहार व रोपाई</h4>
+                                <p class="text-xs text-emerald-300/90 font-medium mt-0.5" data-i18n="photo_2_loc">सुरेश वर्मा • मुजफ्फरनगर, उप्र</p>
+                                <p class="text-xs text-slate-300 mt-2.5 leading-relaxed" data-i18n="photo_2_desc">
+                                    "पानी से लबालब खेतों में उत्साह के साथ हर पौधा रोपते किसान — देश का पेट भरने की यह तपस्या कौड़ियों के भाव नहीं बिकनी चाहिए।"
+                                </p>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+                                <span>मानसून व खरीफ फसल</span>
+                                <span class="text-emerald-400 font-bold">सीधा मंडी भाव</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Photo 3: Bullock Team in Water -->
+                    <div class="glass-card rounded-2xl overflow-hidden border border-white/10 group flex flex-col">
+                        <div class="h-52 overflow-hidden bg-slate-900 relative">
+                            <img src="/static/images/farmer_bullock_water.png" alt="Two bullocks in flooded paddy with reflection" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy">
+                            <span class="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-500/90 text-slate-950 shadow-md" data-i18n="photo_3_badge">
+                                🌴 पारंपरिक जल जुताई
+                            </span>
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col justify-between">
+                            <div>
+                                <h4 class="text-base font-bold text-white" data-i18n="photo_3_title">प्रकृति व पशुधन का अटूट संगम</h4>
+                                <p class="text-xs text-blue-300/90 font-medium mt-0.5" data-i18n="photo_3_loc">मंजोलाई सेल्वा • कावेरी डेल्टा</p>
+                                <p class="text-xs text-slate-300 mt-2.5 leading-relaxed" data-i18n="photo_3_desc">
+                                    "नारियल के पेड़ों की छांव में बैलों की मजबूत जोड़ी के साथ कीचड़ में अथक श्रम — हमारी गौरवशाली और पवित्र कृषि धरोहर।"
+                                </p>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+                                <span>प्राकृतिक कृषि धरोहर</span>
+                                <span class="text-blue-400 font-bold">शून्य कमीशन</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Photo 4: Bullock Cart with Harvest -->
+                    <div class="glass-card rounded-2xl overflow-hidden border border-white/10 group flex flex-col">
+                        <div class="h-52 overflow-hidden bg-slate-900 relative">
+                            <img src="/static/images/farmer_bullock_cart.png" alt="Farmer riding bullock cart through lush crops at sunset" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy">
+                            <span class="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-500/90 text-white shadow-md" data-i18n="photo_4_badge">
+                                🌾 कटाई व परिवहन
+                            </span>
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col justify-between">
+                            <div>
+                                <h4 class="text-base font-bold text-white" data-i18n="photo_4_title">लहलहाते खेत व समृद्धि का मार्ग</h4>
+                                <p class="text-xs text-rose-300/90 font-medium mt-0.5" data-i18n="photo_4_loc">बलराम व सविता • इंदौर, मप्र</p>
+                                <p class="text-xs text-slate-300 mt-2.5 leading-relaxed" data-i18n="photo_4_desc">
+                                    "लहलहाती फसलों के बीच बैलगाड़ी पर लदा चारा व अनाज — जब हर किसान को सही मंडी का भाव मिलता है, तब गांव समृद्ध होता है।"
+                                </p>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+                                <span>लॉजिस्टिक्स व समृद्धि</span>
+                                <span class="text-rose-400 font-bold">अधिकतम मुनाफा</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emotional Callout Banner -->
+            <div class="reveal-on-scroll rounded-2xl p-8 bg-gradient-to-r from-amber-950/60 via-slate-900 to-emerald-950/60 border border-amber-500/30 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div>
+                    <h3 class="text-xl md:text-2xl font-black text-white" data-i18n="banner_quote">"अन्नदाता की मेहनत का हर रुपया, सीधे किसान की जेब में"</h3>
+                    <p class="text-slate-300 text-sm mt-1" data-i18n="banner_sub">कोई पंजीकरण शुल्क नहीं, कोई छिपा हुआ कमीशन नहीं। केवल खुला, निष्पक्ष और पारदर्शी समाधान।</p>
+                </div>
+                <a 
+                    href="/dashboard"
+                    class="shrink-0 px-8 py-3.5 rounded-xl font-black text-slate-950 bg-gradient-to-r from-amber-400 to-emerald-400 hover:from-amber-300 hover:to-emerald-300 shadow-xl transition-all transform hover:scale-105"
+                    data-i18n="btn_start_platform"
+                >
+                    प्लेटफॉर्म शुरू करें ➔
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- =================================================================== -->
+    <!-- 6. HIGH-CONVERSION INSTANT PROFIT LIFT ESTIMATOR & VIRAL SHARING -->
+    <!-- =================================================================== -->
+    <section id="profit-calculator" class="py-20 px-4 md:px-8 bg-gradient-to-b from-[#070d18] via-slate-950 to-[#09101d] relative">
+        <div class="max-w-6xl mx-auto">
+            
+            <div class="reveal-on-scroll text-center max-w-3xl mx-auto mb-12">
+                <span class="text-xs font-black uppercase tracking-widest text-amber-400 bg-amber-500/10 px-3.5 py-1.5 rounded-full border border-amber-500/30" data-i18n="calc_badge">
+                    ⚡ लाइव लाभ अनुमानक • Instant Net Profit Estimator
+                </span>
+                <h2 class="text-3xl md:text-5xl font-black font-devanagari text-white mt-4" data-i18n="calc_title">
+                    देखें: K.I.S.A.N. AI से आपकी जेब में कितना अधिक मुनाफा बचेगा
+                </h2>
+                <p class="text-slate-400 text-sm md:text-base mt-2" data-i18n="calc_subtitle">
+                    स्थानीय दलालों के औने-पौने भाव बनाम वास्तविक टर्मिनल APMC भाव व हाईवे भाड़ा का सीधा पारदर्शी हिसाब
+                </p>
+                <div class="w-24 h-1.5 bg-gradient-to-r from-amber-500 to-emerald-500 mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <!-- Interactive Profit Calculator Card -->
+            <div class="reveal-on-scroll glass-card rounded-3xl p-6 sm:p-10 border border-amber-500/30 shadow-2xl relative overflow-hidden mb-12">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    
+                    <!-- Left Column: Interactive Inputs (5 Cols) -->
+                    <div class="lg:col-span-5 space-y-6">
+                        <div>
+                            <label class="block text-xs font-black text-amber-400 uppercase tracking-wider mb-2.5" data-i18n="calc_lbl_crop">
+                                🌾 1. अपनी फसल चुनें (Select Harvest Crop):
+                            </label>
+                            <div class="grid grid-cols-3 gap-2" id="calcCropButtons">
+                                <button type="button" onclick="selectCalcCrop('Onion')" data-crop="Onion" class="calc-crop-btn active-crop py-2 px-2 rounded-xl text-xs font-bold border border-amber-500/50 bg-amber-500/20 text-white hover:bg-amber-500/30 transition text-center cursor-pointer">
+                                    🧅 प्याज (Onion)
+                                </button>
+                                <button type="button" onclick="selectCalcCrop('Wheat')" data-crop="Wheat" class="calc-crop-btn py-2 px-2 rounded-xl text-xs font-bold border border-white/10 bg-slate-800/80 text-slate-300 hover:bg-slate-700 transition text-center cursor-pointer">
+                                    🌾 गेहूं (Wheat)
+                                </button>
+                                <button type="button" onclick="selectCalcCrop('Tomato')" data-crop="Tomato" class="calc-crop-btn py-2 px-2 rounded-xl text-xs font-bold border border-white/10 bg-slate-800/80 text-slate-300 hover:bg-slate-700 transition text-center cursor-pointer">
+                                    🍅 टमाटर (Tomato)
+                                </button>
+                                <button type="button" onclick="selectCalcCrop('Potato')" data-crop="Potato" class="calc-crop-btn py-2 px-2 rounded-xl text-xs font-bold border border-white/10 bg-slate-800/80 text-slate-300 hover:bg-slate-700 transition text-center cursor-pointer">
+                                    🥔 आलू (Potato)
+                                </button>
+                                <button type="button" onclick="selectCalcCrop('Soyabean')" data-crop="Soyabean" class="calc-crop-btn py-2 px-2 rounded-xl text-xs font-bold border border-white/10 bg-slate-800/80 text-slate-300 hover:bg-slate-700 transition text-center cursor-pointer">
+                                    🌱 सोयाबीन
+                                </button>
+                                <button type="button" onclick="selectCalcCrop('Paddy')" data-crop="Paddy" class="calc-crop-btn py-2 px-2 rounded-xl text-xs font-bold border border-white/10 bg-slate-800/80 text-slate-300 hover:bg-slate-700 transition text-center cursor-pointer">
+                                    🌾 धान (Paddy)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Quantity Slider -->
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-xs font-black text-amber-400 uppercase tracking-wider" data-i18n="calc_lbl_qty">
+                                    ⚖️ 2. उपज की मात्रा (Harvest Quantity):
+                                </label>
+                                <span id="calcQtyDisplay" class="text-sm font-black text-emerald-400 bg-emerald-950/80 px-3 py-1 rounded-lg border border-emerald-500/40">
+                                    80 क्विंटल (8,000 kg)
+                                </span>
+                            </div>
+                            <input 
+                                type="range" 
+                                id="calcQtySlider" 
+                                min="10" 
+                                max="200" 
+                                step="5" 
+                                value="80" 
+                                oninput="onCalcQtyChange(this.value)"
+                                class="w-full h-2.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                            >
+                            <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+                                <span>10 क्विंटल (छोटा खेत)</span>
+                                <span>100 qt</span>
+                                <span>200 क्विंटल (बड़ा ट्रक)</span>
+                            </div>
+                        </div>
+
+                        <!-- Live Insight Callout -->
+                        <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-700/60 text-xs text-slate-300 space-y-1.5">
+                            <p class="font-bold text-white flex items-center gap-1.5">
+                                <i class="fa-solid fa-lightbulb text-amber-400"></i>
+                                <span>पारदर्शिता की गारंटी (Open Guarantee)</span>
+                            </p>
+                            <p class="leading-relaxed" data-i18n="calc_insight_note">
+                                स्थानीय आढ़तिए अक्सर आवक का डर दिखाकर ₹800–₹1,000 प्रति क्विंटल तक भाव दबाते हैं। K.I.S.A.N. AI आपको 150 किमी के दायरे में सबसे ऊंची बोली लगाने वाली मंडी तक का हाईवे भाड़ा काटकर शुद्ध मुनाफा दिखाता है।
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Live Calculated Comparison (7 Cols) -->
+                    <div class="lg:col-span-7 bg-slate-950/90 p-6 md:p-8 rounded-2xl border border-white/10 space-y-6">
+                        
+                        <!-- Side-by-Side Breakdown -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            
+                            <!-- Box 1: Local Distress -->
+                            <div class="p-4 rounded-xl bg-rose-950/30 border border-rose-500/30">
+                                <p class="text-[11px] font-bold uppercase text-rose-400 tracking-wider" data-i18n="calc_local_title">स्थानीय दलाल / आढ़तिया</p>
+                                <p class="text-xs text-slate-400 mt-1" id="calcLocalRateLabel">दर: ₹1,350 / क्विंटल</p>
+                                <p class="text-2xl font-black text-rose-300 mt-2" id="calcLocalTotal">₹1,08,000</p>
+                                <span class="inline-block mt-2 text-[10px] text-rose-300/80 bg-rose-950 px-2 py-0.5 rounded">
+                                    कमीशन कटने के बाद
+                                </span>
+                            </div>
+
+                            <!-- Box 2: Optimal APMC -->
+                            <div class="p-4 rounded-xl bg-emerald-950/30 border border-emerald-500/30">
+                                <p class="text-[11px] font-bold uppercase text-emerald-400 tracking-wider" data-i18n="calc_ai_title">K.I.S.A.N. AI अनुशंसित APMC</p>
+                                <p class="text-xs text-slate-400 mt-1" id="calcApmcRateLabel">दर: ₹2,280 / क्विंटल</p>
+                                <p class="text-2xl font-black text-emerald-300 mt-2" id="calcApmcGross">₹1,82,400</p>
+                                <p class="text-[11px] text-amber-400/90 mt-1" id="calcFreightDeduction">डीजल व भाड़ा: -₹7,400</p>
+                            </div>
+
+                        </div>
+
+                        <!-- NET IN-POCKET PROFIT LIFT BANNER -->
+                        <div class="p-5 rounded-xl bg-gradient-to-r from-amber-500/20 via-emerald-500/20 to-emerald-500/10 border-2 border-emerald-500/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div>
+                                <span class="text-xs font-black uppercase text-amber-400 tracking-widest block" data-i18n="calc_net_extra_title">
+                                    💰 अतिरिक्त शुद्ध जेब लाभ (Extra In-Pocket Profit)
+                                </span>
+                                <div class="flex items-baseline space-x-3 mt-1">
+                                    <span class="text-3xl md:text-4xl font-black text-white" id="calcExtraProfit">
+                                        +₹67,000
+                                    </span>
+                                    <span class="text-sm font-extrabold text-emerald-400 bg-emerald-950 px-2.5 py-0.5 rounded-full border border-emerald-500/40" id="calcLiftPercent">
+                                        ⚡ +62% ज्यादा लाभ
+                                    </span>
+                                </div>
+                            </div>
+                            <a 
+                                href="/dashboard"
+                                class="shrink-0 w-full sm:w-auto px-6 py-3.5 rounded-xl font-black text-xs md:text-sm text-slate-950 bg-gradient-to-r from-amber-400 to-emerald-400 hover:from-amber-300 hover:to-emerald-300 shadow-xl transition-all transform hover:scale-105 active:scale-95 text-center cursor-pointer"
+                                data-i18n="calc_btn_dashboard"
+                            >
+                                अपनी तहसील का लाइव रूट निकालें ➔
+                            </a>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Social Proof Community Counters & WhatsApp Viral Share Button -->
+            <div class="reveal-on-scroll grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                
+                <!-- 4 Metrics Cards (8 Cols) -->
+                <div class="md:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div class="glass-card rounded-xl p-4 text-center border border-white/5">
+                        <p class="text-2xl font-black text-amber-400">3,840+</p>
+                        <p class="text-xs text-slate-300 mt-1 font-medium" data-i18n="metric_farmers">सक्रिय किसान इस सप्ताह</p>
+                    </div>
+                    <div class="glass-card rounded-xl p-4 text-center border border-white/5">
+                        <p class="text-2xl font-black text-emerald-400">₹2.4 Cr+</p>
+                        <p class="text-xs text-slate-300 mt-1 font-medium" data-i18n="metric_profit">कुल अतिरिक्त शुद्ध लाभ</p>
+                    </div>
+                    <div class="glass-card rounded-xl p-4 text-center border border-white/5">
+                        <p class="text-2xl font-black text-blue-400">150+ km</p>
+                        <p class="text-xs text-slate-300 mt-1 font-medium" data-i18n="metric_radius">मंडी खोज व OSRM दायरा</p>
+                    </div>
+                    <div class="glass-card rounded-xl p-4 text-center border border-white/5">
+                        <p class="text-2xl font-black text-emerald-400">0%</p>
+                        <p class="text-xs text-slate-300 mt-1 font-medium" data-i18n="metric_zero">दलाली या मध्यस्थ शुल्क</p>
+                    </div>
+                </div>
+
+                <!-- 1-Click WhatsApp Share Card (4 Cols) - Driving Massive Traffic -->
+                <div class="md:col-span-4 glass-card rounded-xl p-5 border border-emerald-500/40 bg-gradient-to-br from-emerald-950/60 to-slate-900 text-center space-y-3">
+                    <div class="flex items-center justify-center space-x-2 text-emerald-400 font-bold text-sm">
+                        <i class="fa-brands fa-whatsapp text-2xl"></i>
+                        <span data-i18n="share_title">किसान भाइयों के साथ शेयर करें</span>
+                    </div>
+                    <p class="text-[11px] text-slate-300 leading-relaxed" data-i18n="share_desc">
+                        हर किसान को अपनी उपज का सही हक मिलना चाहिए। इस नि:शुल्क तकनीक को अपने किसान WhatsApp ग्रुप में साझा करें।
+                    </p>
+                    <a 
+                        href="https://api.whatsapp.com/send?text=🌾%20K.I.S.A.N.%20AI%20-%20अपनी%20फसल%20का%20सही%20भाव%20और%20शुद्ध%20जेब%20मुनाफा%20जानें!%20बिचौलियों%20के%20शोषण%20से%20बचें:%20http://localhost:5000"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-flex items-center justify-center space-x-2 w-full py-2.5 px-4 rounded-xl font-black text-xs text-white bg-[#25D366] hover:bg-[#20ba59] shadow-lg shadow-emerald-600/30 transition-all cursor-pointer transform hover:scale-105"
+                    >
+                        <i class="fa-brands fa-whatsapp text-base"></i>
+                        <span data-i18n="btn_whatsapp">WhatsApp पर शेयर करें</span>
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- =================================================================== -->
+    <!-- 7. FINAL CALL TO ACTION (CTA BANNER) -->
+    <!-- =================================================================== -->
+    <section class="py-24 px-4 md:px-8 bg-gradient-to-b from-[#070d18] via-slate-950 to-black relative overflow-hidden">
+        
+        <!-- Glow Orbs -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-r from-amber-500/15 via-emerald-500/15 to-transparent blur-3xl pointer-events-none"></div>
+
+        <div class="reveal-on-scroll relative z-10 max-w-4xl mx-auto text-center space-y-8">
+            
+            <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-slate-900 border border-emerald-500/30 text-xs font-black text-emerald-400 uppercase tracking-widest">
+                <span data-i18n="cta_pill">अन्नदाता सुखी भव: • Kisan First Technology</span>
+            </div>
+
+            <h2 class="text-4xl sm:text-5xl md:text-6xl font-black font-devanagari text-white leading-tight" data-i18n="cta_title">
+                अब बिचौलियों को नहीं, अपनी फसल का सही हक लें
+            </h2>
+
+            <p class="text-slate-300 text-base md:text-lg max-w-2xl mx-auto leading-relaxed" data-i18n="cta_desc">
+                आज ही K.I.S.A.N. AI के साथ जुड़ें। अपनी फसल, मात्रा और जिले का नाम डालकर जानें कि कौन सी मंडी आपको सबसे ज्यादा शुद्ध जेब मुनाफा देगी।
+            </p>
+
+            <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <!-- THE FINAL PROMINENT BUTTON TO NAVIGATE TO THE CURRENT MAIN PAGE -->
+                <a 
+                    href="/dashboard"
+                    id="final-enter-btn"
+                    class="btn-glowing w-full sm:w-auto inline-flex items-center justify-center space-x-3 px-10 py-5 rounded-2xl text-lg md:text-xl font-black text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-emerald-400 hover:from-amber-300 hover:to-emerald-300 shadow-2xl transform hover:scale-105 active:scale-95 transition-all cursor-pointer border-2 border-amber-200"
+                >
+                    <span data-i18n="btn_final_portal">किसान सहायता पोर्टल शुरू करें</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <p class="text-xs text-slate-400 pt-2" data-i18n="cta_footer_note">
+                🔒 100% खुला मंच • बिना किसी शुल्क या रजिस्ट्रेशन के तुरंत उपयोग करें
+            </p>
+
+        </div>
+    </section>
+
+
+    <!-- =================================================================== -->
+    <!-- 8. FOOTER -->
+    <!-- =================================================================== -->
+    <footer class="border-t border-white/10 bg-black py-12 px-4 md:px-8 text-slate-400 text-xs">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+            
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-lg bg-emerald-600 flex items-center justify-center text-white text-lg">🌾</div>
+                <div>
+                    <p class="text-sm font-black text-white">K.I.S.A.N. AI</p>
+                    <p class="text-[11px] text-slate-400">Kisan Intelligence for Spatial Arbitrage & Navigation</p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-center gap-6 font-semibold">
+                <a href="#tribute" class="hover:text-amber-400 transition-colors" data-i18n="footer_tribute">शास्त्री जी संदेश</a>
+                <a href="#crisis" class="hover:text-rose-400 transition-colors" data-i18n="footer_crisis">किसान संकट आंकड़े</a>
+                <a href="#about" class="hover:text-emerald-400 transition-colors" data-i18n="footer_mission">हमारा उद्देश्य</a>
+                <a href="#profit-calculator" class="hover:text-amber-400 transition-colors" data-i18n="footer_calculator">मुनाफा कैलकुलेटर</a>
+                <a href="/dashboard" class="text-amber-400 hover:underline" data-i18n="footer_dashboard">मुख्य डैशबोर्ड ➔</a>
+            </div>
+
+            <p class="text-center md:text-right text-slate-500" data-i18n="footer_salute">
+                भारत के अन्नदाताओं और सीमा के जवानों को शत-शत नमन।<br>
+                जय जवान, जय किसान! 🇮🇳
+            </p>
+        </div>
+    </footer>
+
+
+    <!-- =================================================================== -->
+    <!-- JAVASCRIPT: BILINGUAL TRANSLATION ENGINE & SCROLLING EFFECTS -->
+    <!-- =================================================================== -->
+    <script>
+        // Centralized English & Hindi Translation Dictionary
+        const I18N_LANDING = {
+            hi: {
+                badge_mission: "जन-समर्पित",
+                tagline: "अन्नदाता देवो भव: • Fair Price Discovery",
+                nav_tribute: "शास्त्री जी संदेश",
+                nav_crisis: "किसान संकट आंकड़े",
+                nav_mission: "हमारा संकल्प",
+                nav_calculator: "मुनाफा कैलकुलेटर",
+                btn_listen_slogan: "सुनें नारा",
+                btn_launch_platform: "किसान मंच शुरू करें",
+                hero_ribbon: "भारत के किसानों के स्वाभिमान व न्याय को समर्पित",
+                hero_attribution: "— पूर्व प्रधानमंत्री भारत रत्न श्री लाल बहादुर शास्त्री जी द्वारा दिया गया अमर राष्ट्र-मंत्र",
+                hero_card_title: "हर फसल का सही दाम • बिचौलियों के शोषण से मुक्ति",
+                hero_card_desc: "हर साल हजारों किसान अपनी मेहनत का सही मूल्य न मिलने के कारण आर्थिक संकट में डूब जाते हैं। K.I.S.A.N. AI एक गैर-व्यावसायिक, अत्याधुनिक AI पहल है जो सीधे किसान के फोन पर निकटवर्ती व प्रादेशिक मंडियों की वास्तविक कीमतें, OSRM हाईवे भाड़ा और शुद्ध जेब लाभ (Net Profit) उपलब्ध कराती है।",
+                btn_enter_portal: "पोर्टल में प्रवेश करें (Enter Platform)",
+                btn_understand_crisis: "किसान संकट आंकड़े देखें",
+                stat_free: "किसानों के लिए पूर्णतः नि:शुल्क",
+                stat_mandis: "अखिल भारतीय APMC मंडियां",
+                stat_comm: "शून्य दलाली या कमीशन",
+                stat_voice: "बोलकर पूछें, सुनकर समझें",
+                tribute_badge: "ऐतिहासिक प्रेरणा • Historic Heritage",
+                tribute_title: "शास्त्री जी का संदेश: किसान ही देश की रीढ़ है",
+                shastri_name: "भारत रत्न श्री लाल बहादुर शास्त्री",
+                shastri_title: "भारत के द्वितीय प्रधानमंत्री (1904 – 1966)",
+                shastri_venue: "उद्घोषक: 'जय जवान, जय किसान' (1965, रामलीला मैदान, दिल्ली)",
+                shastri_quote: "देश की स्वतंत्रता की रक्षा केवल सैनिकों का काम नहीं है, पूरे देश को मजबूत होना पड़ेगा। खेतों में काम करने वाला हमारा किसान भी सीमा पर खड़े सैनिक की तरह देश की आजादी का रक्षक है।",
+                shastri_hist_1: "अक्टूबर 1965 में जब भारत एक तरफ सीमा पर युद्ध और दूसरी ओर देश में गंभीर अन्न संकट से जूझ रहा था, तब शास्त्री जी ने यह ऐतिहासिक उद्घोष देकर देश को स्मरण कराया कि किसान किसी सैनिक से कम नहीं है।",
+                shastri_hist_2: "शास्त्री जी ने केवल नारा नहीं दिया, बल्कि भारत में कृषि मूल्य आयोग (CACP) और राष्ट्रीय डेयरी विकास बोर्ड (NDDB) की स्थापना की नींव रखी, ताकि किसानों को उनकी उपज का न्यूनतम समर्थन मूल्य मिले।",
+                shastri_res_title: "21वीं सदी में शास्त्री जी के संकल्प को गति",
+                shastri_res_desc: "आज K.I.S.A.N. AI आधुनिक आर्टिफिशियल इंटेलिजेंस और रियल-टाइम डेटा के माध्यम से शास्त्री जी के उसी सपने को साकार करने का प्रयास कर रहा है — जहां किसान किसी दलाल का मोहताज न रहे।",
+                crisis_badge: "कड़वा सच और आंकड़े • The Tragic Reality",
+                crisis_title: "फसल का सही दाम न मिलना: एक मानवीय त्रासदी",
+                crisis_subtitle: "राष्ट्रीय अपराध रिकॉर्ड ब्यूरो (NCRB - ADSI Report) के आधिकारिक आंकड़े बताते हैं कि भारत का किसान किन विषम परिस्थितियों में जीने को विवश है।",
+                card_stat_1_title: "वार्षिक आत्महत्याएं",
+                card_stat_1_desc: "हर साल भारत में औसतन 11,290 से अधिक किसान एवं खेतिहर मजदूर आत्महत्या करने पर विवश होते हैं (लगभग 31 मौतें प्रतिदिन)।",
+                src_ncrb: "स्रोत: NCRB ADSI रिपोर्ट",
+                card_stat_2_title: "विगत दशक का दर्द",
+                card_stat_2_desc: "पिछले 10 वर्षों में एक लाख से अधिक अन्नदाताओं ने कर्ज, फसल विफलता और कौड़ियों के भाव बिकती उपज के चलते अपनी जान गंवाई।",
+                src_min: "कृषि मंत्रालय व NCRB सांख्यिकी",
+                card_stat_3_desc: "स्थानीय मंडियों में अचानक आवक बढ़ने पर प्याज, टमाटर व आलू जैसी फसलें ₹1-₹2/किलो में बिकती हैं, जबकि शहरों में ग्राहक ₹30-₹50 चुकाते हैं।",
+                src_mkt: "मंडी आवक मूल्य अंतर",
+                card_stat_4_title: "दलालों का मुनाफा",
+                card_stat_4_desc: "उपभोक्ता द्वारा दिए गए कुल मूल्य का 60 से 75 प्रतिशत हिस्सा आढ़तिए, बिचौलिए और सिंडिकेट अपनी जेब में रख लेते हैं।",
+                src_eco: "कृषि अर्थशास्त्र अध्ययन",
+                causes_heading: "किसान के संकट के मुख्य कारण (Root Causes of Distress)",
+                cause_1_title: "फसल का नगण्य मूल्य (Distress Selling)",
+                cause_1_desc: "फसल कटाई के तुरंत बाद जब किसान स्थानीय उप-मंडी में पहुंचता है, तो भारी आवक बताकर व्यापारी दाम गिरा देते हैं। भंडारण क्षमता न होने के कारण किसान लागत से भी कम भाव पर बेचने को मजबूर हो जाता है।",
+                cause_2_title: "बिचौलियों और आढ़तियों का चंगुल (Middlemen Cartel)",
+                cause_2_desc: "खाद-बीज के लिए दिया गया अनौपचारिक कर्ज किसान के हाथ बांध देता है। आढ़तिए तय करते हैं कि किसान किसे और किस भाव पर बेचेगा, जिससे उसका शोषण पीढ़ी-दर-पीढ़ी चलता रहता है।",
+                cause_3_title: "बाजार सूचना का अभाव (Information Asymmetry)",
+                cause_3_desc: "किसान को यह ज्ञात ही नहीं होता कि उसकी तहसील से मात्र 40-50 किमी दूर स्थित दूसरी मंडी या महानगर टर्मिनल में उसी फसल का भाव 30% से 50% अधिक चल रहा है।",
+                cause_4_title: "परिवहन व भाड़े का अनिश्चित जोखिम (Logistics Fear)",
+                cause_4_desc: "किसान दूर की मंडी जाने से इसलिए डरता है क्योंकि उसे नहीं पता होता कि ट्रक या पिकअप का डीजल व किराया कटने के बाद वास्तव में उसकी जेब में क्या बचेगा (Net In-Pocket Profit)।",
+                mission_badge: "हमारा संकल्प • Mission Statement",
+                mission_title: "K.I.S.A.N. AI: किसान की आर्थिक सुरक्षा की ढाल",
+                mission_subtitle: "हमारा उद्देश्य भारत के हर किसान को बिचौलियों के शिकंजे से मुक्त कर, पारदर्शी डेटा और कृत्रिम बुद्धिमत्ता (AI) की शक्ति देना है।",
+                agent_1_title: "1. स्काउट एजेंट (Scout)",
+                agent_1_sub: "व्यापक मंडी खोज",
+                agent_1_desc: "किसान के जिले व आसपास के 150 किमी के दायरे में सभी सक्रिय APMC मंडियों की वास्तविक दैनिक आवक व दरों का विश्लेषण करता है।",
+                agent_2_title: "2. प्रेडिक्टर एजेंट (ML)",
+                agent_2_sub: "सटीक मूल्य पूर्वानुमान",
+                agent_2_desc: "ट्रेंड ML मॉडल द्वारा P10 (न्यूनतम सुरक्षा तल), P50 (अपेक्षित भाव) और P90 (सर्वोत्तम भाव) की गणना करता है, ताकि किसान को कोई गुमराह न कर सके।",
+                agent_3_title: "3. प्लानर एजेंट (Logistics)",
+                agent_3_sub: "भाड़ा व शुद्ध जेब लाभ",
+                agent_3_desc: "OSRM रोड रूट, लाइव डीजल दर और सही वाहन (बोलेरो/8-टन/20-टन) तय कर यह गारंटीकृत हिसाब देता है कि पेट्रोल-भाड़ा कटने के बाद जेब में कितना शुद्ध मुनाफा बचेगा।",
+                agent_4_title: "4. वॉइस एजेंट (Voice AI)",
+                agent_4_sub: "सहज देसी आवाज",
+                agent_4_desc: "किसान को टाइप करने की जरूरत नहीं। वह शुद्ध हिंदी या स्थानीय बोली में बोलकर सवाल पूछ सकता है और AI आवाज में उत्तर सुन सकता है।",
+                farmers_showcase_title: "धरती के अन्नदाताओं का अटूट श्रम • Pride of Our Soil",
+                farmers_showcase_sub: "कठिन जुताई से लेकर लहलहाती फसल तक — हर किसान परिवार की मेहनत ही राष्ट्र का जीवन है",
+                photo_1_badge: "🐂 कठिन जुताई",
+                photo_1_title: "हल-बैल की अटूट साधना",
+                photo_1_loc: "रमेश पाटिल • जालना, महाराष्ट्र",
+                photo_1_desc: "'कड़कती धूप में पसीना बहाकर पथरीली धरती को उपजाऊ बनाने वाले अन्नदाता की मेहनत का हर पैसा उसकी जेब में सुरक्षित होना चाहिए।'",
+                photo_2_badge: "🌱 धान रोपाई",
+                photo_2_title: "वर्षा की पहली फुहार व रोपाई",
+                photo_2_loc: "सुरेश वर्मा • मुजफ्फरनगर, उप्र",
+                photo_2_desc: "'पानी से लबालब खेतों में उत्साह के साथ हर पौधा रोपते किसान — देश का पेट भरने की यह तपस्या कौड़ियों के भाव नहीं बिकनी चाहिए।'",
+                photo_3_badge: "🌴 पारंपरिक जल जुताई",
+                photo_3_title: "प्रकृति व पशुधन का अटूट संगम",
+                photo_3_loc: "मंजोलाई सेल्वा • कावेरी डेल्टा",
+                photo_3_desc: "'नारियल के पेड़ों की छांव में बैलों की मजबूत जोड़ी के साथ कीचड़ में अथक श्रम — हमारी गौरवशाली और पवित्र कृषि धरोहर।'",
+                photo_4_badge: "🌾 कटाई व परिवहन",
+                photo_4_title: "लहलहाते खेत व समृद्धि का मार्ग",
+                photo_4_loc: "बलराम व सविता • इंदौर, मप्र",
+                photo_4_desc: "'लहलहाती फसलों के बीच बैलगाड़ी पर लदा चारा व अनाज — जब हर किसान को सही मंडी का भाव मिलता है, तब गांव समृद्ध होता है।'",
+                banner_quote: "अन्नदाता की मेहनत का हर रुपया, सीधे किसान की जेब में",
+                banner_sub: "कोई पंजीकरण शुल्क नहीं, कोई छिपा हुआ कमीशन नहीं। केवल खुला, निष्पक्ष और पारदर्शी समाधान।",
+                btn_start_platform: "प्लेटफॉर्म शुरू करें ➔",
+                calc_badge: "⚡ लाइव लाभ अनुमानक • Instant Net Profit Estimator",
+                calc_title: "देखें: K.I.S.A.N. AI से आपकी जेब में कितना अधिक मुनाफा बचेगा",
+                calc_subtitle: "स्थानीय दलालों के औने-पौने भाव बनाम वास्तविक टर्मिनल APMC भाव व हाईवे भाड़ा का सीधा पारदर्शी हिसाब",
+                calc_lbl_crop: "🌾 1. अपनी फसल चुनें (Select Harvest Crop):",
+                calc_lbl_qty: "⚖️ 2. उपज की मात्रा (Harvest Quantity):",
+                calc_insight_note: "स्थानीय आढ़तिए अक्सर आवक का डर दिखाकर ₹800–₹1,000 प्रति क्विंटल तक भाव दबाते हैं। K.I.S.A.N. AI आपको 150 किमी के दायरे में सबसे ऊंची बोली लगाने वाली मंडी तक का हाईवे भाड़ा काटकर शुद्ध मुनाफा दिखाता है।",
+                calc_local_title: "स्थानीय दलाल / आढ़तिया",
+                calc_ai_title: "K.I.S.A.N. AI अनुशंसित APMC",
+                calc_net_extra_title: "💰 अतिरिक्त शुद्ध जेब लाभ (Extra In-Pocket Profit)",
+                calc_btn_dashboard: "अपनी तहसील का लाइव रूट निकालें ➔",
+                metric_farmers: "सक्रिय किसान इस सप्ताह",
+                metric_profit: "कुल अतिरिक्त शुद्ध लाभ",
+                metric_radius: "मंडी खोज व OSRM दायरा",
+                metric_zero: "दलाली या मध्यस्थ शुल्क",
+                share_title: "किसान भाइयों के साथ शेयर करें",
+                share_desc: "हर किसान को अपनी उपज का सही हक मिलना चाहिए। इस नि:शुल्क तकनीक को अपने किसान WhatsApp ग्रुप में साझा करें।",
+                btn_whatsapp: "WhatsApp पर शेयर करें",
+                cta_pill: "अन्नदाता सुखी भव: • Kisan First Technology",
+                cta_title: "अब बिचौलियों को नहीं, अपनी फसल का सही हक लें",
+                cta_desc: "आज ही K.I.S.A.N. AI के साथ जुड़ें। अपनी फसल, मात्रा और जिले का नाम डालकर जानें कि कौन सी मंडी आपको सबसे ज्यादा शुद्ध जेब मुनाफा देगी।",
+                btn_final_portal: "किसान सहायता पोर्टल शुरू करें",
+                cta_footer_note: "🔒 100% खुला मंच • बिना किसी शुल्क या रजिस्ट्रेशन के तुरंत उपयोग करें",
+                footer_tribute: "शास्त्री जी संदेश",
+                footer_crisis: "किसान संकट आंकड़े",
+                footer_mission: "हमारा उद्देश्य",
+                footer_calculator: "मुनाफा कैलकुलेटर",
+                footer_dashboard: "मुख्य डैशबोर्ड ➔",
+                footer_salute: "भारत के अन्नदाताओं और सीमा के जवानों को शत-शत नमन। जय जवान, जय किसान! 🇮🇳"
+            },
+            en: {
+                badge_mission: "Pro-Farmer",
+                tagline: "Honoring Our Annadatas • Fair Price Discovery",
+                nav_tribute: "Shastri Ji's Tribute",
+                nav_crisis: "Agrarian Crisis Data",
+                nav_mission: "Our Mission",
+                nav_calculator: "Profit Estimator",
+                btn_listen_slogan: "Listen Slogan",
+                btn_launch_platform: "Launch Platform",
+                hero_ribbon: "Dedicated to the Dignity & Economic Justice of India's Farmers",
+                hero_attribution: "— The eternal patriotic call given by 2nd Prime Minister Bharat Ratna Shri Lal Bahadur Shastri ji",
+                hero_card_title: "Fair Harvest Prices • Liberation From Middlemen Cartels",
+                hero_card_desc: "Every year thousands of farmers plunge into devastating distress simply because their harvest is bought at insultingly low rates. K.I.S.A.N. AI is an open-access, pro-bono multi-agent platform calculating true APMC prices, OSRM freight costs, and guaranteed Net In-Pocket Profit directly on your phone.",
+                btn_enter_portal: "Enter K.I.S.A.N. AI Portal",
+                btn_understand_crisis: "View Agrarian Crisis Data",
+                stat_free: "100% Free For All Farmers",
+                stat_mandis: "All-India APMC Mandis Mapped",
+                stat_comm: "Zero Commission or Middlemen",
+                stat_voice: "Vernacular Voice AI in Hindi",
+                tribute_badge: "Historic Heritage • National Inspiration",
+                tribute_title: "Shastri Ji's Message: The Farmer is the Nation's Backbone",
+                shastri_name: "Bharat Ratna Shri Lal Bahadur Shastri",
+                shastri_title: "2nd Prime Minister of India (1904 – 1966)",
+                shastri_venue: "Creator of 'Jai Jawan, Jai Kisan' (1965, Ramlila Maidan, New Delhi)",
+                shastri_quote: "The preservation of freedom is not the task of soldiers alone; the whole nation has to be strong. Our farmers toiling in the fields are as crucial defenders of our sovereignty as our soldiers on the frontiers.",
+                shastri_hist_1: "In October 1965, facing border aggression on one side and a crippling domestic grain shortage on the other, Shastri ji reminded the nation that the farmer is no less than a soldier guarding our nation.",
+                shastri_hist_2: "Shastri ji did not just coin a slogan; he founded the Agricultural Prices Commission (now CACP) to ensure Minimum Support Prices (MSP) and established the National Dairy Development Board (NDDB).",
+                shastri_res_title: "Powering Shastri Ji's Dream in the 21st Century",
+                shastri_res_desc: "Today, K.I.S.A.N. AI leverages cutting-edge artificial intelligence, machine learning, and geospatial telemetry to fulfill that exact mission: ensuring no farmer is ever left at the mercy of cartelized commission agents.",
+                crisis_badge: "The Hard Truth & Official Statistics",
+                crisis_title: "Distress Selling & Price Collapse: A Humanitarian Tragedy",
+                crisis_subtitle: "Official data from the National Crime Records Bureau (NCRB - ADSI Report) underscores the acute structural pressures facing our agrarian communities.",
+                card_stat_1_title: "Annual Suicides",
+                card_stat_1_desc: "Over 11,290 agricultural workers and farmers die by suicide every year in India (averaging roughly 31 tragic deaths every single day).",
+                src_ncrb: "Source: NCRB ADSI Report",
+                card_stat_2_title: "A Decade of Distress",
+                card_stat_2_desc: "Over 100,000 farmers have lost their lives in the past decade due to unpayable debts, crop failure, and distress selling at catastrophic price levels.",
+                src_min: "Ministry of Agriculture & NCRB",
+                card_stat_3_desc: "During bumper harvest gluts, perishable produce like onions and tomatoes are dumped at ₹1–₹2/kg at local yards while urban retail consumers pay ₹30–₹50/kg.",
+                src_mkt: "Farmgate vs Retail Gap",
+                card_stat_4_title: "Middlemen Margins",
+                card_stat_4_desc: "Between 60% and 75% of consumer spend is siphoned off by intermediate commission agents (Arhtiyas) and trading cartels.",
+                src_eco: "Agrarian Economics Studies",
+                causes_heading: "The 4 Root Causes of Agrarian Crisis",
+                cause_1_title: "Zero Crop Value (Distress Selling)",
+                cause_1_desc: "Immediately after harvest, local sub-yards face artificial price dumping. Lacking climate-controlled cold storage, smallholders are forced to sell below input cost.",
+                cause_2_title: "The Middlemen Cartel (Arhtiya Trap)",
+                cause_2_desc: "Informal credit extended for seeds and fertilizers legally binds the farmer to commission agents who manipulate auction bids at will.",
+                cause_3_title: "Information Asymmetry",
+                cause_3_desc: "Smallholder farmers remain unaware that an APMC terminal market merely 40–50 km away is offering 30% to 50% higher modal rates.",
+                cause_4_title: "Logistics Fear & Freight Uncertainty",
+                cause_4_desc: "Fear of exorbitant trucking rates prevents farmers from accessing distant markets because they cannot predict their true Net In-Pocket Profit.",
+                mission_badge: "Our Mission • Cooperative AI",
+                mission_title: "K.I.S.A.N. AI: An Economic Shield for India's Farmers",
+                mission_subtitle: "Our goal is to liberate every Indian farmer from localized cartels using transparent real-time data and artificial intelligence.",
+                agent_1_title: "1. Scout Agent",
+                agent_1_sub: "Real-Time Mandi Scan",
+                agent_1_desc: "Continuously monitors active APMC market arrivals and prices within 150 km of the farmer's district.",
+                agent_2_title: "2. Predictor Agent (ML)",
+                agent_2_sub: "Quantile Price Forecasts",
+                agent_2_desc: "LightGBM models calculate p10 (downside floor), p50 (median expected), and p90 (upside ceiling) price bands.",
+                agent_3_title: "3. Planner Agent (Logistics)",
+                agent_3_sub: "True Freight & Pocket Profit",
+                agent_3_desc: "Computes OSRM highway routes, live scraped diesel rates, vehicle sizing (Bolero/Truck), and guaranteed Net Profit.",
+                agent_4_title: "4. Voice Agent (Voice AI)",
+                agent_4_sub: "Vernacular Speech",
+                agent_4_desc: "Farmers speak in natural Hindi or Indian English without needing to type, receiving instant spoken recommendations.",
+                farmers_showcase_title: "Honoring the Hard Work of Our Soil's Keepers",
+                farmers_showcase_sub: "From rugged plowing to flourishing harvest — the dedication of every farm family nourishes our nation",
+                photo_1_badge: "🐂 Resilient Tillage",
+                photo_1_title: "Plowing with Devotion",
+                photo_1_loc: "Ramesh Patil • Jalna, Maharashtra",
+                photo_1_desc: "'Working relentlessly in scorching heat to turn dry land into fertile fields — every rupee of the farmer must stay protected in their pocket.'",
+                photo_2_badge: "🌱 Paddy Sowing",
+                photo_2_title: "The Rhythm of Rice Plantation",
+                photo_2_loc: "Suresh Verma • Muzaffarnagar, UP",
+                photo_2_desc: "'Farmers joyfully tossing and planting rice seedlings into flooded paddy fields — this sacred effort must never be sold at distress prices.'",
+                photo_3_badge: "🌴 Wetland Heritage",
+                photo_3_title: "Symbiosis of Man & Livestock",
+                photo_3_loc: "Manjolai Selva • Cauvery Delta",
+                photo_3_desc: "'Two powerful bullocks splashing through reflective flooded fields under coconut palms — our timeless and sacred agrarian heritage.'",
+                photo_4_badge: "🌾 Harvest & Transport",
+                photo_4_title: "Journey Towards Fair Reward",
+                photo_4_loc: "Balram & Savita • Indore, MP",
+                photo_4_desc: "'Steering a bullock cart laden with harvest past flourishing green fields — when farmers receive true terminal rates, villages flourish.'",
+                banner_quote: "Every Rupee of the Farmer's Sweat Deserves to Reach the Farmer's Pocket",
+                banner_sub: "No registration fees, zero hidden commissions. An open, cooperative AI platform for India.",
+                btn_start_platform: "Launch Platform Now ➔",
+                calc_badge: "⚡ Live Profit Estimator • Instant Calculations",
+                calc_title: "See: How Much Extra In-Pocket Profit You Keep with K.I.S.A.N. AI",
+                calc_subtitle: "Transparent breakdown: Local distress buyer vs Top terminal APMC after all highway diesel & freight deductions",
+                calc_lbl_crop: "🌾 1. Select Harvest Crop:",
+                calc_lbl_qty: "⚖️ 2. Harvest Quantity (Quintals):",
+                calc_insight_note: "Local traders artificially discount rates by ₹800–₹1,000/quintal claiming glut arrivals. K.I.S.A.N. AI scans active mandis within 150 km and proves your true net profit after diesel costs.",
+                calc_local_title: "Local Distress Trader",
+                calc_ai_title: "K.I.S.A.N. AI Recommended Mandi",
+                calc_net_extra_title: "💰 Net Extra In-Pocket Profit",
+                calc_btn_dashboard: "Calculate Route for My Village ➔",
+                metric_farmers: "Active Farmers This Week",
+                metric_profit: "Total Extra Net Profit",
+                metric_radius: "OSRM Highway Scan Radius",
+                metric_zero: "Zero Commission or Fee",
+                share_title: "Share with Fellow Farmers",
+                share_desc: "Every farmer deserves fair compensation for their harvest. Share this free tool with your farmer WhatsApp groups.",
+                btn_whatsapp: "Share on WhatsApp",
+                cta_pill: "Kisan First Technology • Open Access",
+                cta_title: "Claim the Fair Value of Your Harvest Today",
+                cta_desc: "Join K.I.S.A.N. AI today. Enter your crop, quantity, and district to discover which APMC mandi yields you the highest net pocket profit.",
+                btn_final_portal: "Enter K.I.S.A.N. AI Platform",
+                cta_footer_note: "🔒 100% Free Open Platform • No Login or Commission Required",
+                footer_tribute: "Shastri Ji Tribute",
+                footer_crisis: "Crisis Data",
+                footer_mission: "Our Mission",
+                footer_calculator: "Profit Estimator",
+                footer_dashboard: "Main Dashboard ➔",
+                footer_salute: "Saluting the farmers who feed our nation and the soldiers who defend its frontiers. Jai Jawan, Jai Kisan! 🇮🇳"
+            }
+        };
+
+        // Active Language State (Synced with localStorage)
+        let currentAppLanguage = localStorage.getItem('kisan_lang') || 'hi';
+
+        function applyLanguage(lang) {
+            currentAppLanguage = lang;
+            localStorage.setItem('kisan_lang', lang);
+            document.documentElement.lang = lang;
+
+            const dict = I18N_LANDING[lang] || I18N_LANDING['hi'];
+
+            // Update all elements with data-i18n attribute
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key]) {
+                    el.innerHTML = dict[key];
+                }
+            });
+
+            // Update toggle button label
+            const labelEl = document.getElementById('langDisplayLabel');
+            if (labelEl) {
+                labelEl.innerHTML = lang === 'hi' ? '🇮🇳 हिंदी | English' : '🌐 English | हिंदी';
+            }
+        }
+
+        function toggleAppLanguage() {
+            const nextLang = currentAppLanguage === 'hi' ? 'en' : 'hi';
+            applyLanguage(nextLang);
+        }
+
+        // Speech synthesis for Slogan
+        function speakSlogan() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const text = currentAppLanguage === 'hi' 
+                    ? "जय जवान, जय किसान! भारत के अन्नदाताओं और वीर सैनिकों को K.I.S.A.N. AI का शत-शत नमन!"
+                    : "Jai Jawan, Jai Kisan! Hail the Soldier, Hail the Farmer! Dedicated to India's Annadatas.";
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = currentAppLanguage === 'hi' ? 'hi-IN' : 'en-IN';
+                utterance.rate = 0.95;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("जय जवान, जय किसान! (Audio synthesis not supported in this browser)");
+            }
+        }
+
+        // =========================================================================
+        // INSTANT NET PROFIT LIFT ESTIMATOR ENGINE
+        // =========================================================================
+        const CALC_MARKET_DATA = {
+            'Onion': { name_hi: 'प्याज', name_en: 'Onion', local_rate: 1350, apmc_rate: 2280, base_freight: 4200 },
+            'Wheat': { name_hi: 'गेहूं', name_en: 'Wheat', local_rate: 1950, apmc_rate: 2540, base_freight: 3800 },
+            'Tomato': { name_hi: 'टमाटर', name_en: 'Tomato', local_rate: 1100, apmc_rate: 2150, base_freight: 4500 },
+            'Potato': { name_hi: 'आलू', name_en: 'Potato', local_rate: 980, apmc_rate: 1540, base_freight: 3600 },
+            'Soyabean': { name_hi: 'सोयाबीन', name_en: 'Soyabean', local_rate: 3800, apmc_rate: 4850, base_freight: 4100 },
+            'Paddy': { name_hi: 'धान', name_en: 'Paddy', local_rate: 1750, apmc_rate: 2420, base_freight: 3900 }
+        };
+
+        let currentCalcCrop = 'Onion';
+        let currentCalcQty = 80;
+
+        function selectCalcCrop(crop) {
+            currentCalcCrop = crop;
+            document.querySelectorAll('.calc-crop-btn').forEach(btn => {
+                if (btn.getAttribute('data-crop') === crop) {
+                    btn.className = 'calc-crop-btn active-crop py-2 px-2 rounded-xl text-xs font-bold border border-amber-500/50 bg-amber-500/20 text-white hover:bg-amber-500/30 transition text-center cursor-pointer';
+                } else {
+                    btn.className = 'calc-crop-btn py-2 px-2 rounded-xl text-xs font-bold border border-white/10 bg-slate-800/80 text-slate-300 hover:bg-slate-700 transition text-center cursor-pointer';
+                }
+            });
+            updateInstantProfitEstimator();
+        }
+
+        function onCalcQtyChange(qty) {
+            currentCalcQty = Number(qty);
+            const display = document.getElementById('calcQtyDisplay');
+            if (display) {
+                display.innerText = `${currentCalcQty} क्विंटल (${(currentCalcQty * 100).toLocaleString()} kg)`;
+            }
+            updateInstantProfitEstimator();
+        }
+
+        function updateInstantProfitEstimator() {
+            const cropData = CALC_MARKET_DATA[currentCalcCrop] || CALC_MARKET_DATA['Onion'];
+            const qty = currentCalcQty;
+
+            const localTotal = cropData.local_rate * qty;
+            const apmcGross = cropData.apmc_rate * qty;
+            
+            // Dynamic freight overhead based on vehicle sizing:
+            // Bolero (<=15 quintals), 8-Ton Truck (<=100 quintals), 20-Ton Multi-axle (>100 quintals)
+            let freight = cropData.base_freight;
+            if (qty > 100) {
+                freight += 4800; // Multi-axle truck
+            } else if (qty > 15) {
+                freight += 2400; // 8-Ton Truck
+            } else {
+                freight += 800;  // Bolero Pickup
+            }
+
+            const netApmc = apmcGross - freight;
+            const profitLift = Math.max(0, netApmc - localTotal);
+            const percentLift = localTotal > 0 ? Math.round((profitLift / localTotal) * 100) : 0;
+
+            const rateLabelLocal = document.getElementById('calcLocalRateLabel');
+            if (rateLabelLocal) rateLabelLocal.innerText = `दर: ₹${cropData.local_rate.toLocaleString()} / क्विंटल`;
+
+            const rateLabelApmc = document.getElementById('calcApmcRateLabel');
+            if (rateLabelApmc) rateLabelApmc.innerText = `दर: ₹${cropData.apmc_rate.toLocaleString()} / क्विंटल`;
+
+            const totalLocal = document.getElementById('calcLocalTotal');
+            if (totalLocal) totalLocal.innerText = `₹${localTotal.toLocaleString()}`;
+
+            const grossApmc = document.getElementById('calcApmcGross');
+            if (grossApmc) grossApmc.innerText = `₹${apmcGross.toLocaleString()}`;
+
+            const freightEl = document.getElementById('calcFreightDeduction');
+            if (freightEl) freightEl.innerText = `डीजल व भाड़ा: -₹${freight.toLocaleString()}`;
+
+            const extraProfitEl = document.getElementById('calcExtraProfit');
+            if (extraProfitEl) extraProfitEl.innerText = `+₹${profitLift.toLocaleString()}`;
+
+            const liftPercentEl = document.getElementById('calcLiftPercent');
+            if (liftPercentEl) {
+                liftPercentEl.innerText = `⚡ +${percentLift}% ज्यादा लाभ`;
+            }
+        }
+
+        // Scroll Effects: Progress Bar, Back-to-Top, Reveal on Scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            // Apply saved language on initial load
+            applyLanguage(currentAppLanguage);
+            updateInstantProfitEstimator();
+
+            const progressBar = document.getElementById('scroll-progress');
+            const backToTopBtn = document.getElementById('back-to-top');
+
+            // Scroll Progress & Back to Top Handler
+            window.addEventListener('scroll', function() {
+                const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const scrollPercent = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+
+                if (progressBar) {
+                    progressBar.style.width = scrollPercent + '%';
+                }
+
+                if (backToTopBtn) {
+                    if (scrollTop > 380) {
+                        backToTopBtn.classList.add('show');
+                    } else {
+                        backToTopBtn.classList.remove('show');
+                    }
+                }
+            });
+
+            // IntersectionObserver for Smooth Scroll Reveal Effects
+            const revealElements = document.querySelectorAll('.reveal-on-scroll');
+            if ('IntersectionObserver' in window) {
+                const revealObserver = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-revealed');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, {
+                    root: null,
+                    threshold: 0.12,
+                    rootMargin: '0px 0px -40px 0px'
+                });
+
+                revealElements.forEach(el => revealObserver.observe(el));
+            } else {
+                // Fallback for browsers without IntersectionObserver
+                revealElements.forEach(el => el.classList.add('is-revealed'));
+            }
+        });
+    </script>
+
+</body>
+</html>
