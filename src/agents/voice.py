@@ -742,7 +742,17 @@ class VoiceAgent:
                 loc_info = self.planner.geocode_farmer_location(loc_name)
                 w = self.scout.fetch_weather(loc_info["latitude"], loc_info["longitude"])
                 temp = w.get("temperature", 28.0)
-                cond = w.get("weather_condition", "Clear")
+                wcode = int(w.get("weathercode") or 0)
+                if wcode == 0:
+                    cond = "साफ" if is_hindi else "Clear"
+                elif 1 <= wcode <= 3:
+                    cond = "बादल" if is_hindi else "Cloudy"
+                elif (51 <= wcode <= 67) or (80 <= wcode <= 82):
+                    cond = "बारिश" if is_hindi else "Rain"
+                elif 95 <= wcode <= 99:
+                    cond = "तूफान" if is_hindi else "Thunderstorm"
+                else:
+                    cond = "साफ" if is_hindi else "Clear"
                 rain = w.get("precipitation", 0.0)
                 if is_hindi:
                     reply = (
