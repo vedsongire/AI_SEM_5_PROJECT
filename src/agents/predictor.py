@@ -71,6 +71,16 @@ def get_district_rainfall(state: str, district: str, month: int = 8) -> float:
                 val = round(float(sum(daily_rain)), 2)
                 OPEN_METEO_RAINFALL_CACHE[key] = val
                 OPEN_METEO_RAINFALL_CACHE[d_clean.lower()] = val
+                try:
+                    loaded = {}
+                    if cache_file.exists():
+                        with open(cache_file, "r", encoding="utf-8") as f:
+                            loaded = json.load(f)
+                    loaded[key] = {"rainfall_mm": val}
+                    with open(cache_file, "w", encoding="utf-8") as f:
+                        json.dump(loaded, f, indent=4)
+                except Exception:
+                    pass
                 return val
     except Exception:
         pass
@@ -207,6 +217,14 @@ class PredictorAgent:
                         price_col = c
                         break
                 if price_col:
+                    comm_col = None
+                    for c in df.columns:
+                        if str(c).strip().lower() in ("commodity", "commodity name", "commodity_name"):
+                            comm_col = c
+                            break
+                    if comm_col:
+                        df = df[df[comm_col].astype(str).str.lower().str.contains(crop_clean, na=False)]
+                        
                     prices = pd.to_numeric(df[price_col], errors="coerce").dropna()
                     if len(prices) >= 5:
                         return {

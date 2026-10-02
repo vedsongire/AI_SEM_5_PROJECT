@@ -1605,11 +1605,11 @@
 
         function applyRecommendationToDashboard(crop, quantity, location) {
             toggleFarmerChatbot(false);
-            if (crop) document.getElementById('cropSelect').value = crop;
-            if (quantity) document.getElementById('quantityInput').value = quantity;
-            if (location) document.getElementById('locationInput').value = location;
+            if (crop) document.getElementById('crop').value = crop;
+            if (quantity) document.getElementById('quantity').value = quantity;
+            if (location) document.getElementById('location').value = location;
 
-            const form = document.getElementById('arbitrageForm');
+            const form = document.getElementById('optimizerForm');
             if (form) {
                 form.scrollIntoView({ behavior: 'smooth' });
                 // Trigger live optimization on dashboard

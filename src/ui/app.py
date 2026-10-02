@@ -124,10 +124,10 @@ def optimize_api():
 
         try:
             quantity_qt = float(raw_quantity)
-            if quantity_qt <= 0:
+            if not math.isfinite(quantity_qt) or quantity_qt <= 0:
                 raise ValueError
         except ValueError:
-            return jsonify({"status": "error", "message": "Quantity must be a positive number."}), 400
+            return jsonify({"status": "error", "message": "Quantity must be a positive finite number."}), 400
 
         if not planner_agent or not predictor_agent or not scout_agent:
             return jsonify({
@@ -158,6 +158,7 @@ def optimize_api():
             farmer_lon=farmer_lon,
             state=state,
             commodity=commodity,
+            active_mandi_records=scout_agent.fetch_live_mandi_prices(state=state, commodity=commodity) if scout_agent else None
         )
 
         if not candidates:
@@ -173,7 +174,7 @@ def optimize_api():
         # ---------------------------------------------------------------------
         # STEP 4: Scrape Live Diesel Rate & Predict ML Quantile Price Bands
         # ---------------------------------------------------------------------
-        diesel_price = planner_agent._get_live_diesel_price(state)
+        # diesel_price will be extracted from logistics results
         predictions = {}
         for cm in candidates:
             raw_mname = cm.get("market_name")
@@ -182,7 +183,7 @@ def optimize_api():
             else:
                 clean_market_name = str(raw_mname).strip()
 
-            market_key = clean_market_name.lower()
+            market_key = clean_market_name
             m_modal = cm.get("modal_price")
             try:
                 modal_price_val = float(m_modal) if m_modal is not None and not (isinstance(m_modal, float) and math.isnan(m_modal)) else 0.0
@@ -237,7 +238,7 @@ def optimize_api():
         comparison_list = []
         for idx, item in enumerate(logistics_results[:3], start=1):
             raw_m_name = item.get("market_name")
-            m_key = str(raw_m_name).strip().lower() if raw_m_name is not None else ""
+            m_key = str(raw_m_name).strip() if raw_m_name is not None else ""
             p_band = predictions.get(m_key, {})
 
             p10_val = p_band.get("p10_downside_floor") or p_band.get("p10", 0)
@@ -301,7 +302,7 @@ def optimize_api():
                 "district": district,
                 "state": state,
             },
-            "diesel_price": round(diesel_price, 2),
+            "diesel_price": round(winner.get("live_diesel_price_per_l", 90.0), 2),
             "diesel_state": state,
             "assigned_vehicle": assigned_vehicle,
             "weather_advisory": weather_advisory,
@@ -333,8 +334,17 @@ def optimize_api():
 # K.I.S.A.N. AI FARMER CONVERSATIONAL CHATBOT & VOICE API
 # =============================================================================
 
-CHAT_SESSION_REGISTRY = {}
+import time
+import re
 
+CHAT_SESSION_REGISTRY = {}
+SESSION_TTL_SECONDS = 3600
+
+def _clean_expired_sessions():
+    now = time.time()
+    expired = [sid for sid, sdata in CHAT_SESSION_REGISTRY.items() if now - sdata.get("last_accessed", 0) > SESSION_TTL_SECONDS]
+    for sid in expired:
+        del CHAT_SESSION_REGISTRY[sid]
 
 @app.route("/api/chat", methods=["POST"])
 def chat_api():
@@ -352,6 +362,11 @@ def chat_api():
         language = data.get("language", "hi-IN")
         audio_b64 = data.get("audio_base64")
 
+        _clean_expired_sessions()
+
+        if session_id and not re.match(r"^CHAT_[a-zA-Z0-9]{1,32}$", session_id):
+            return jsonify({"status": "error", "message": "Invalid session ID format."}), 400
+
         # If browser audio bytes were sent, transcribe with speech_recognition
         if audio_b64:
             try:
@@ -367,7 +382,8 @@ def chat_api():
         if not user_message:
             return jsonify({"status": "error", "message": "Message is required."}), 400
 
-        session_memory = CHAT_SESSION_REGISTRY.get(session_id, {})
+        session_record = CHAT_SESSION_REGISTRY.get(session_id, {})
+        session_memory = session_record.get("state", {})
 
         # Execute multi-turn conversational chat logic
         chat_res = voice_agent.chat(
@@ -376,7 +392,10 @@ def chat_api():
             language=language,
         )
 
-        CHAT_SESSION_REGISTRY[session_id] = chat_res.get("session_state", {})
+        CHAT_SESSION_REGISTRY[session_id] = {
+            "state": chat_res.get("session_state", {}),
+            "last_accessed": time.time()
+        }
 
         return jsonify({
             "status": "success",
@@ -399,6 +418,8 @@ def chat_reset_api():
     """Reset chatbot session memory for a fresh conversation."""
     data = request.json or {}
     session_id = data.get("session_id")
+    if session_id and not re.match(r"^CHAT_[a-zA-Z0-9]{1,32}$", session_id):
+        return jsonify({"status": "error", "message": "Invalid session ID format."}), 400
     if session_id and session_id in CHAT_SESSION_REGISTRY:
         del CHAT_SESSION_REGISTRY[session_id]
     return jsonify({"status": "success", "message": "Chat session reset successfully."})

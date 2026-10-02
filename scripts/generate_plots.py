@@ -107,7 +107,9 @@ axes[0, 1].grid(True, linestyle=':', alpha=0.6)
 axes[0, 1].legend(frameon=True)
 
 # 3. Feature Importance Ranking
-importances = model_p50.feature_importances_
+from sklearn.inspection import permutation_importance
+result = permutation_importance(model_p50, X_test, y_test, n_repeats=10, random_state=42, n_jobs=-1)
+importances = result.importances_mean
 relative_imp = (importances / importances.sum()) * 100.0
 fi_df = pd.DataFrame({'Feature': feature_cols, 'Importance': relative_imp}).sort_values('Importance', ascending=True)
 

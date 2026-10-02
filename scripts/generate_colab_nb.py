@@ -38,6 +38,7 @@ notebook = {
                 "        from google.colab import files\n",
                 "        print('Please upload `mandi_historical_fallback.csv`:')\n",
                 "        uploaded = files.upload()\n",
+                "        data_file = list(uploaded.keys())[0]\n",
                 "    except Exception as e:\n",
                 "        print('Upload prompt:', e)\n",
                 "\n",
@@ -458,7 +459,7 @@ notebook = {
             "metadata": {},
             "outputs": [],
             "source": [
-                "latex_str = f\"\"\"% --- IEEE Conference Table Format ---\n\\\\begin{{table}}[htbp]\n\\\\caption{{Empirical Evaluation & Baseline Comparison on Mandi Price Dataset}}\n\\\\label{{tab:model_evaluation}}\n\\\\centering\n\\\\begin{{tabular}}{{lcccc}}\n\\\\hline\n\\\\textbf{{Model Architecture}} & \\\\textbf{{MAE (INR)}} & \\\\textbf{{RMSE (INR)}} & \\\\textbf{{$R^2$ Score}} & \\\\textbf{{PICP (80\\\\%)}}\\\\\n\\\\hline\nBaseline Mean (Dummy) & {mean_absolute_error(y_test, dummy_pred):.2f} & {np.sqrt(mean_squared_error(y_test, dummy_pred)):.2f} & {r2_score(y_test, dummy_pred):.4f} & N/A \\\\\\\\\nRidge Linear Regressor & {mean_absolute_error(y_test, ridge_pred):.2f} & {np.sqrt(mean_squared_error(y_test, ridge_pred)):.2f} & {r2_score(y_test, ridge_pred):.4f} & N/A \\\\\\\\\nRandom Forest Regressor & {mean_absolute_error(y_test, rf_pred):.2f} & {np.sqrt(mean_squared_error(y_test, rf_pred)):.2f} & {r2_score(y_test, rf_pred):.4f} & N/A \\\\\\\\\n\\\\textbf{{Proposed Multi-Quantile GBR}} & \\\\textbf{{{mae_p50:.2f}}} & \\\\textbf{{{rmse_p50:.2f}}} & \\\\textbf{{{r2_p50:.4f}}} & \\\\textbf{{{picp_score:.2f}\\\\%}} \\\\\\\\\n\\\\hline\n\\\\end{{tabular}}\n\\\\end{{table}}\n\"\"\"\n",
+                "latex_str = f\"\"\"% --- IEEE Conference Table Format ---\n\\\\begin{{table}}[htbp]\n\\\\caption{{Empirical Evaluation \\\\& Baseline Comparison on Mandi Price Dataset}}\n\\\\label{{tab:model_evaluation}}\n\\\\centering\n\\\\begin{{tabular}}{{lcccc}}\n\\\\hline\n\\\\textbf{{Model Architecture}} & \\\\textbf{{MAE (INR)}} & \\\\textbf{{RMSE (INR)}} & \\\\textbf{{$R^2$ Score}} & \\\\textbf{{PICP (80\\\\%)}}\\\\\n\\\\hline\nBaseline Mean (Dummy) & {mean_absolute_error(y_test, dummy_pred):.2f} & {np.sqrt(mean_squared_error(y_test, dummy_pred)):.2f} & {r2_score(y_test, dummy_pred):.4f} & N/A \\\\\\\\\nRidge Linear Regressor & {mean_absolute_error(y_test, ridge_pred):.2f} & {np.sqrt(mean_squared_error(y_test, ridge_pred)):.2f} & {r2_score(y_test, ridge_pred):.4f} & N/A \\\\\\\\\nRandom Forest Regressor & {mean_absolute_error(y_test, rf_pred):.2f} & {np.sqrt(mean_squared_error(y_test, rf_pred)):.2f} & {r2_score(y_test, rf_pred):.4f} & N/A \\\\\\\\\n\\\\textbf{{Proposed Multi-Quantile GBR}} & \\\\textbf{{{mae_p50:.2f}}} & \\\\textbf{{{rmse_p50:.2f}}} & \\\\textbf{{{r2_p50:.4f}}} & \\\\textbf{{{picp_score:.2f}\\\\%}} \\\\\\\\\n\\\\hline\n\\\\end{{tabular}}\n\\\\end{{table}}\n\"\"\"\n",
                 "print(latex_str)\n",
                 "with open('table_ieee_metrics.tex', 'w') as f:\n",
                 "    f.write(latex_str)"

@@ -14,6 +14,9 @@ __pycache__
 *.pyo
 *.pyd
 
+# Credentials
+config/.env
+
 # Temporary files & notebooks
 scratch
 notebooks

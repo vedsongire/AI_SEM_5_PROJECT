@@ -85,7 +85,7 @@ If you have a free [Docker Hub](https://hub.docker.com/) account:
 
 2. **Your friend simply runs:**
    ```bash
-   docker run -d -p 5000:5000 <your-dockerhub-username>/kisan-ai:latest
+   docker run -d -p 5000:5000 -v "${PWD}/data:/app/data" <your-dockerhub-username>/kisan-ai:latest
    ```
 
 ---

@@ -196,7 +196,7 @@ class PlannerAgent:
                 with open(fp, mode="r", encoding="utf-8-sig") as f:
                     for row in csv.DictReader(f):
                         row_state = (row.get("State") or row.get("state") or "").strip().lower()
-                        if target_state not in row_state and row_state not in target_state:
+                        if not row_state or (target_state not in row_state and row_state not in target_state):
                             continue
                         row_comm = (row.get("Commodity") or row.get("commodity") or "").strip().lower()
                         m_name = row.get("Market") or row.get("market") or "APMC Market"
@@ -210,7 +210,7 @@ class PlannerAgent:
                             "modal_price": modal_p,
                             "arrivals_tonnes": "10",
                         }
-                        if target_commodity and (target_commodity in row_comm or row_comm in target_commodity):
+                        if target_commodity and row_comm and (target_commodity in row_comm or row_comm in target_commodity):
                             comm_records.append(record_entry)
                             if len(comm_records) >= 30:
                                 break
@@ -236,7 +236,7 @@ class PlannerAgent:
                     with open(target_file, mode="r", encoding="utf-8-sig") as f:
                         for row in csv.DictReader(f):
                             row_state = (row.get("State Name") or row.get("state") or row.get("State") or "").strip().lower()
-                            if target_state not in row_state and row_state not in target_state:
+                            if not row_state or (target_state not in row_state and row_state not in target_state):
                                 continue
                             m_name = row.get("Market Name") or row.get("market") or "APMC Market"
                             dist_name = row.get("District Name") or row.get("district") or state

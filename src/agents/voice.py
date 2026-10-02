@@ -305,7 +305,8 @@ class VoiceAgent:
                 pass
 
         # 2. Check Hindi written number words preceding quintal
-        for word, val in self.HINDI_NUMBERS.items():
+        sorted_hindi = sorted(self.HINDI_NUMBERS.items(), key=lambda x: len(x[0]), reverse=True)
+        for word, val in sorted_hindi:
             if f"{word} क्विंटल" in clean_text or f"{word} किवंटल" in clean_text:
                 return float(val)
 
@@ -348,6 +349,9 @@ class VoiceAgent:
             "बताओ", "बताइए", "चाहिए", "बेचना", "में", "से", "यहाँ", "नजदीकी", "लाभ", "खर्च", "कृपया",
             "जानकारी", "दे", "दो", "कितना", "मिलेगा", "दर", "दाम", "आज", "मुझे", "मैं", "हम", "मेरा",
             "मेरी", "मेरे", "पास", "कौन", "कौनसी", "सी", "सा", "हैं", "बेचूँ", "बेचनी", "चाहता", "चाहती", "हूँ", "हूं",
+            "hello", "hi", "namaste", "नमस्ते", "प्रणाम", "राम राम", "सत श्री अकाल",
+            "weather", "rain", "मौसम", "बारिश", "तापमान", "clouds",
+            "help", "kaise", "how to", "मदद", "सहायता"
         }
         for sw in sorted(stop_words, key=len, reverse=True):
             clean = re.sub(r"(?<!\w)" + re.escape(sw) + r"(?!\w)", " ", clean, flags=re.IGNORECASE)
@@ -377,18 +381,18 @@ class VoiceAgent:
         location = self._extract_location(text, commodity=commodity, quantity=quantity)
 
         clean_lower = text.lower()
-        has_devanagari = any("\u0900" <= c <= "\u097f" for c in text)
-        english_words = {"what", "is", "the", "best", "where", "can", "i", "sell", "price", "profit", "for", "in", "of", "and", "how", "much"}
-        words_set = set(re.findall(r"\b[a-zA-Z]+\b", clean_lower))
-        has_english_tokens = len(words_set.intersection(english_words)) >= 2
-        is_hindi = has_devanagari or (not has_english_tokens and any(w in clean_lower for w in ["namaste", "bhav", "gehun", "aalu", "kisan", "pyaj", "chawal", "batao"]))
 
-        # Classify intent using whole-word boundary matching (same boundary behavior as _extract_commodity)
         def _has_word(keywords: List[str]) -> bool:
             return any(
                 re.search(r"(?<!\w)" + re.escape(w.lower()) + r"(?!\w)", clean_lower)
                 for w in keywords
             )
+
+        has_devanagari = any("\u0900" <= c <= "\u097f" for c in text)
+        english_words = {"what", "is", "the", "best", "where", "can", "i", "sell", "price", "profit", "for", "in", "of", "and", "how", "much"}
+        words_set = set(re.findall(r"\b[a-zA-Z]+\b", clean_lower))
+        has_english_tokens = len(words_set.intersection(english_words)) >= 2
+        is_hindi = has_devanagari or (not has_english_tokens and _has_word(["namaste", "bhav", "gehun", "aalu", "kisan", "pyaj", "chawal", "batao"]))
 
         if _has_word(["hello", "hi", "namaste", "नमस्ते", "प्रणाम", "राम राम", "सत श्री अकाल"]):
             if not commodity and not location:
@@ -410,7 +414,7 @@ class VoiceAgent:
             "raw_text": text,
             "intent": intent,
             "commodity": commodity,
-            "quantity_quintals": quantity if quantity else 50.0,
+            "raw_quantity": quantity,
             "location": location,
             "is_hindi": is_hindi,
         }
@@ -583,9 +587,9 @@ class VoiceAgent:
 
         # Step 2: Vernacular NLU parsing
         parsed = self.parse_query(query_text)
-        commodity = parsed.get("commodity") or "Wheat"
-        quantity = parsed.get("quantity_quintals") or 50.0
-        location = parsed.get("location") or "Muzaffarnagar, Uttar Pradesh"
+        commodity = parsed.get("commodity")
+        quantity = parsed.get("raw_quantity")
+        location = parsed.get("location")
         is_hindi = parsed.get("is_hindi", True) or "hi" in language
 
         # Step 3: Multi-agent execution
@@ -711,8 +715,9 @@ class VoiceAgent:
         # Merge extracted entities into state memory
         if parsed.get("commodity"):
             state["commodity"] = parsed["commodity"]
-        if parsed.get("quantity_quintals"):
-            state["quantity_quintals"] = parsed["quantity_quintals"]
+        raw_qty = parsed.get("raw_quantity")
+        if raw_qty is not None:
+            state["quantity_quintals"] = raw_qty
         if parsed.get("location"):
             state["location"] = parsed["location"]
 

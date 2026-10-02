@@ -80,8 +80,9 @@ class ScoutAgent:
         self.api_key: Optional[str] = self.gov_api_key
 
         if not self.gov_api_key or not self.gov_api_key.strip():
-            raise ValueError(
-                f"GOV_API_KEY is missing or empty. Please configure it in '{resolved_env_path}'."
+            import logging
+            logging.warning(
+                f"GOV_API_KEY is missing or empty. Please configure it in '{resolved_env_path}'. Local CSV fallback will be used."
             )
 
     @staticmethod

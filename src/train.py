@@ -151,11 +151,14 @@ def _geocode(name: str):
 
     data = _get_json(
         GEOCODE_URL,
-        {"name": name, "countryCode": "IN", "count": 1},  # countryCode, not "country"
+        {"name": name, "count": 10},
     )
     results = data.get("results")
 
     if results:
+        for r in results:
+            if r.get("country_code", "").upper() == "IN" or r.get("country", "").lower() == "india":
+                return r["latitude"], r["longitude"]
         return results[0]["latitude"], results[0]["longitude"]
     return None
 

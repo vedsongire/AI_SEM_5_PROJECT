@@ -8,13 +8,15 @@ import os
 
 NB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'notebooks', 'kisan_data_visualization_and_analysis.ipynb')
 
+import uuid
+
 def md(source):
     """Create a markdown cell."""
-    return {"cell_type": "markdown", "metadata": {}, "source": source}
+    return {"cell_type": "markdown", "id": str(uuid.uuid4())[:8], "metadata": {}, "source": source}
 
 def code(source):
     """Create a code cell with no outputs."""
-    return {"cell_type": "code", "execution_count": None, "metadata": {}, "outputs": [], "source": source}
+    return {"cell_type": "code", "execution_count": None, "id": str(uuid.uuid4())[:8], "metadata": {}, "outputs": [], "source": source}
 
 def build_notebook():
     cells = []
@@ -395,9 +397,9 @@ def build_notebook():
         "kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)\n",
         "df_cluster['cluster'] = kmeans.fit_predict(X_scaled)\n",
         "\n",
-        "cluster_names = {0: 'Tier 1: High Volume / Stable Baseline',\n",
-        "                 1: 'Tier 2: High Volatility / Arbitrage Hubs',\n",
-        "                 2: 'Tier 3: Premium High-Value Produce'}\n",
+        "cluster_names = {0: 'Tier 1: Stable Baseline',\n",
+        "                 1: 'Tier 2: Arbitrage Hubs',\n",
+        "                 2: 'Tier 3: Premium Produce'}\n",
         "df_cluster['cluster_name'] = df_cluster['cluster'].map(cluster_names)\n",
         "\n",
         "# PCA\n",
@@ -488,14 +490,14 @@ def build_notebook():
         "fig, axes = plt.subplots(1, 2, figsize=(16, 6))\n",
         "\n",
         "# Confusion Matrix\n",
-        "cm = confusion_matrix(y_test, y_pred_rf)\n",
+        "cm = confusion_matrix(y_test, y_pred_rf, labels=class_names)\n",
         "sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=class_names, yticklabels=class_names, ax=axes[0])\n",
         "axes[0].set_title(f\"Random Forest Confusion Matrix (Accuracy: {acc_rf*100:.1f}%)\", fontsize=13, fontweight='bold')\n",
         "axes[0].set_xlabel(\"Predicted Volatility Class\")\n",
         "axes[0].set_ylabel(\"True Volatility Class\")\n",
         "\n",
         "# Feature Importance\n",
-        "importances = pd.Series(rf_clf.feature_importances_, index=['Modal Price', 'Min Price', 'Max Price', 'Month', 'Commodity Code', 'State Code'])\n",
+        "importances = pd.Series(rf_clf.feature_importances_, index=['modal_price', 'min_price', 'max_price', 'month', 'commodity_code', 'state_code'])\n",
         "importances = importances.sort_values(ascending=True)\n",
         "\n",
         "importances.plot(kind='barh', color='#2b5c8f', ax=axes[1], alpha=0.85)\n",
