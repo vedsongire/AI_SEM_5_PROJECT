@@ -50,15 +50,7 @@
 18. [🧪 Automated Testing & Verification](#-automated-testing--verification)
 19. [💡 Architectural Rationales & Interview FAQ Defense](#-architectural-rationales--interview-faq-defense)
 
----
 
-## 🎙️ How to Explain This Project in an Interview (The Master Pitch)
-
-> *"In India, smallholder farmers often suffer catastrophic losses because they sell their harvest in local village markets for ₹10 to ₹15 per kilogram, while the exact same produce trades at ₹35 to ₹50 in major terminal APMCs like Mumbai Vashi or Delhi Azadpur. Middlemen exploit this spatial price gap by convincing farmers that transport expenses will wipe out any distant profit.*
-> 
-> *To solve this, I built **K.I.S.A.N. AI**—a decentralized, 100% data-driven multi-agent spatial arbitrage engine. It uses a **ScoutAgent** that queries over 325 localized crop market datasets and live Open-Meteo weather forecasts; a **PredictorAgent** that runs a 9-feature Multi-Quantile Gradient Boosting model to output downside $p_{10}$ safety floors, $p_{50}$ median expected rates, and $p_{90}$ upside potential; and a **PlannerAgent** that geocodes coordinates, calculates real driving highway distance via the Project OSRM API, scrapes live state diesel prices from GoodReturns, dynamically sizes freight trucks based on yield tonnage, and computes exact **Net In-Pocket Profit** after deducting every rupee of fuel, tolls, and loading fees.*
-> 
-> *To protect against post-harvest decay, we engineered an **Interactive Highway Route Map** with 1-click Google Maps GPS navigation and a **Transit Weather & Cargo Spoilage Risk Advisory** that monitors corridor temperature, humidity, and rain radar to calculate distress losses prevented and provide custom tarpaulin protocols. Finally, we added **Kisan Mitra**, an in-browser vernacular voice assistant in Hindi and English powered by Google STT and gTTS. The whole platform operates without static mocks or hardcoded variables, achieving an empirical 86.1% prediction interval coverage."*
 
 ---
 
