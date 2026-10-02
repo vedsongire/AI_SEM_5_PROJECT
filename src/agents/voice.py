@@ -342,12 +342,14 @@ class VoiceAgent:
             "sell", "selling", "profit", "transport", "freight", "truck", "distance", "recommendation",
             "please", "tell", "me", "show", "give", "of", "and", "from", "i", "want", "have", "my", "which",
             "where", "can", "how", "much", "good", "better", "produce", "crop", "harvest",
-            "नमस्ते", "किसान", "भाई", "का", "की", "के", "लिए", "सबसे", "अच्छी", "मंडी", "भाव", "क्या", "है",
+            "hello", "hi", "namaste", "weather", "rain", "clouds", "cloudy", "temperature",
+            "नमस्ते", "प्रणाम", "राम", "राम राम", "सत श्री अकाल", "मौसम", "बारिश", "तापमान", "बादल", "कैसा", "कैसी",
+            "किसान", "भाई", "का", "की", "के", "लिए", "सबसे", "अच्छी", "मंडी", "भाव", "क्या", "है",
             "बताओ", "बताइए", "चाहिए", "बेचना", "में", "से", "यहाँ", "नजदीकी", "लाभ", "खर्च", "कृपया",
             "जानकारी", "दे", "दो", "कितना", "मिलेगा", "दर", "दाम", "आज", "मुझे", "मैं", "हम", "मेरा",
             "मेरी", "मेरे", "पास", "कौन", "कौनसी", "सी", "सा", "हैं", "बेचूँ", "बेचनी", "चाहता", "चाहती", "हूँ", "हूं",
         }
-        for sw in stop_words:
+        for sw in sorted(stop_words, key=len, reverse=True):
             clean = re.sub(r"(?<!\w)" + re.escape(sw) + r"(?!\w)", " ", clean, flags=re.IGNORECASE)
 
         # Clean punctuation and extra whitespace
@@ -381,15 +383,21 @@ class VoiceAgent:
         has_english_tokens = len(words_set.intersection(english_words)) >= 2
         is_hindi = has_devanagari or (not has_english_tokens and any(w in clean_lower for w in ["namaste", "bhav", "gehun", "aalu", "kisan", "pyaj", "chawal", "batao"]))
 
-        # Classify intent
-        if any(w in clean_lower for w in ["hello", "hi", "namaste", "नमस्ते", "प्रणाम", "राम राम", "सत श्री अकाल"]):
+        # Classify intent using whole-word boundary matching (same boundary behavior as _extract_commodity)
+        def _has_word(keywords: List[str]) -> bool:
+            return any(
+                re.search(r"(?<!\w)" + re.escape(w.lower()) + r"(?!\w)", clean_lower)
+                for w in keywords
+            )
+
+        if _has_word(["hello", "hi", "namaste", "नमस्ते", "प्रणाम", "राम राम", "सत श्री अकाल"]):
             if not commodity and not location:
                 intent = "GREETING"
             else:
                 intent = "ARBITRAGE_RECOMMENDATION"
-        elif any(w in clean_lower for w in ["weather", "rain", "मौसम", "बारिश", "तापमान", "clouds"]):
+        elif _has_word(["weather", "rain", "मौसम", "बारिश", "तापमान", "clouds"]):
             intent = "WEATHER"
-        elif any(w in clean_lower for w in ["help", "kaise", "how to", "मदद", "सहायता"]):
+        elif _has_word(["help", "kaise", "how to", "मदद", "सहायता"]):
             intent = "HELP"
         elif commodity and location:
             intent = "ARBITRAGE_RECOMMENDATION"
