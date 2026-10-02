@@ -2,7 +2,7 @@
 
 Connects the locked single-page HTML5/Tailwind frontend to real backend agents:
 - ScoutAgent (Live Weather & APMC Mandi Data Ingestion)
-- PredictorAgent (LightGBM ML Price Quantile Predictions: p10, p50, p90)
+- PredictorAgent (HistGradientBoosting ML Price Quantile Predictions: p10, p50, p90)
 - PlannerAgent (Geocoding, Diesel Rate Scraping, Highway OSRM Routing & Economics)
 """
 
@@ -64,11 +64,6 @@ except Exception as exc:
 
 
 @app.route("/")
-def index():
-    """Render the dedicated K.I.S.A.N. AI Landing Page."""
-    return render_template("landing.html")
-
-
 @app.route("/dashboard")
 @app.route("/app")
 @app.route("/main")
@@ -249,11 +244,24 @@ def optimize_api():
             p50_val = p_band.get("p50_median_expected") or p_band.get("p50", 0)
             p90_val = p_band.get("p90_upside_ceiling") or p_band.get("p90", 0)
 
+            m_coords = item.get("mandi_coordinates") or (0.0, 0.0)
+            m_lat = round(float(m_coords[0]), 4) if len(m_coords) > 0 else 0.0
+            m_lon = round(float(m_coords[1]), 4) if len(m_coords) > 1 else 0.0
+            dur_mins = round(float(item.get("driving_duration_mins", 0)))
+            gmaps_nav_url = (
+                f"https://www.google.com/maps/dir/?api=1&origin={farmer_lat},{farmer_lon}"
+                f"&destination={m_lat},{m_lon}&travelmode=driving"
+            )
+
             comparison_list.append({
                 "rank": idx,
                 "market_name": item.get("market_name"),
                 "district": item.get("district", district),
                 "distance_km": round(item.get("one_way_distance_km", 0), 1),
+                "driving_duration_mins": dur_mins,
+                "coordinates": {"lat": m_lat, "lon": m_lon},
+                "route_geometry": item.get("route_geometry", []),
+                "google_maps_url": gmaps_nav_url,
                 "transport_cost": round(item.get("total_transport_cost_inr", 0)),
                 "p10_floor": round(p10_val),
                 "p50_expected": round(p50_val),
@@ -262,6 +270,25 @@ def optimize_api():
                 "net_profit": round(item.get("net_expected_profit_inr", 0)),
                 "is_hero": (idx == 1),
             })
+
+        winner_coords = winner.get("mandi_coordinates") or (0.0, 0.0)
+        w_lat = round(float(winner_coords[0]), 4) if len(winner_coords) > 0 else 0.0
+        w_lon = round(float(winner_coords[1]), 4) if len(winner_coords) > 0 else 0.0
+        w_dur = round(float(winner.get("driving_duration_mins", 0)))
+        winner_gmaps_url = (
+            f"https://www.google.com/maps/dir/?api=1&origin={farmer_lat},{farmer_lon}"
+            f"&destination={w_lat},{w_lon}&travelmode=driving"
+        )
+
+        # Compute real-time weather transit spoilage advisory via ScoutAgent
+        weather_advisory = scout_agent.evaluate_cargo_spoilage_risk(
+            weather_data=env_data,
+            commodity=commodity,
+            distance_km=float(winner.get("one_way_distance_km", 0)),
+            duration_mins=float(w_dur),
+            quantity_quintals=quantity_qt,
+            expected_modal_price=float(winner.get("p50_median_price") or winner.get("p50_expected") or 2200),
+        )
 
         response_payload = {
             "status": "success",
@@ -277,10 +304,15 @@ def optimize_api():
             "diesel_price": round(diesel_price, 2),
             "diesel_state": state,
             "assigned_vehicle": assigned_vehicle,
+            "weather_advisory": weather_advisory,
             "hero_winner": {
                 "market_name": winner.get("market_name"),
                 "district": winner.get("district", district),
                 "distance_km": round(winner.get("one_way_distance_km", 0), 1),
+                "driving_duration_mins": w_dur,
+                "coordinates": {"lat": w_lat, "lon": w_lon},
+                "route_geometry": winner.get("route_geometry", []),
+                "google_maps_url": winner_gmaps_url,
                 "transport_cost": round(winner.get("total_transport_cost_inr", 0)),
                 "modal_price": round(winner.get("p50_median_price") or winner.get("p50_expected") or winner.get("predicted_modal_price") or 0),
                 "gross_revenue": round(winner.get("gross_expected_revenue_inr", 0)),

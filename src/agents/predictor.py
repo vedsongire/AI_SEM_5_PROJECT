@@ -229,7 +229,7 @@ class PredictorAgent:
         weather_data: Optional[Dict[str, Any]],
         ndvi_data: Dict[str, Any],
     ) -> Dict[str, Any]:
-        """Predict quantile price bands (10th, 50th, 90th percentiles) using 9-feature ML models or empirical data.
+        """Predict quantile price bands (10th, 50th, 90th percentiles) using 7-feature ML models or empirical data.
 
         Args:
             mandi_record: Single market record dict from ScoutAgent (containing modal_price, state, etc.).
@@ -264,8 +264,6 @@ class PredictorAgent:
             parsed_dt = pd.Timestamp.now()
 
         month = int(parsed_dt.month)
-        day_of_week = int(parsed_dt.dayofweek)
-        day = int(parsed_dt.day)
 
         # Dynamic precipitation check
         weather_code = None
@@ -301,15 +299,15 @@ class PredictorAgent:
             )
             encoded_cats = self.encoder.transform(cat_df)
 
+            # Build feature row matching the exact 7-feature schema saved during training:
+            # ['state', 'district', 'market', 'commodity', 'variety', 'month', 'rainfall_mm']
             row_dict = {
                 "state": encoded_cats[0][0],
                 "district": encoded_cats[0][1],
                 "market": encoded_cats[0][2],
                 "commodity": encoded_cats[0][3],
                 "variety": encoded_cats[0][4],
-                "month": month,
-                "day_of_week": day_of_week,
-                "day": day,
+                "month": float(month),
                 "rainfall_mm": rainfall_val,
             }
             input_df = pd.DataFrame([row_dict])[self.feature_cols]
@@ -394,7 +392,7 @@ class PredictorAgent:
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("Testing PredictorAgent Dynamic District Predictions (9-Feature Pipeline)...")
+    print("Testing PredictorAgent Dynamic District Predictions (7-Feature Pipeline)...")
     print("=" * 60)
 
     predictor = PredictorAgent()

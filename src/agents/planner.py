@@ -199,20 +199,26 @@ class PlannerAgent:
                         if target_state not in row_state and row_state not in target_state:
                             continue
                         row_comm = (row.get("Commodity") or row.get("commodity") or "").strip().lower()
+                        m_name = row.get("Market") or row.get("market") or "APMC Market"
+                        dist_name = row.get("District") or row.get("district") or state
+                        modal_p = row.get("Modal_x0020_Price") or row.get("modal_price") or "2200"
+                        record_entry = {
+                            "market_name": m_name,
+                            "district": dist_name,
+                            "state": row.get("State") or state,
+                            "commodity": row_comm or commodity,
+                            "modal_price": modal_p,
+                            "arrivals_tonnes": "10",
+                        }
                         if target_commodity and (target_commodity in row_comm or row_comm in target_commodity):
-                            m_name = row.get("Market") or row.get("market") or "APMC Market"
-                            dist_name = row.get("District") or row.get("district") or state
-                            modal_p = row.get("Modal_x0020_Price") or row.get("modal_price") or "2200"
-                            comm_records.append({
-                                "market_name": m_name,
-                                "district": dist_name,
-                                "state": row.get("State") or state,
-                                "commodity": commodity,
-                                "modal_price": modal_p,
-                                "arrivals_tonnes": "10",
-                            })
+                            comm_records.append(record_entry)
                             if len(comm_records) >= 30:
                                 break
+                        elif not target_commodity and len(state_records) < 30:
+                            # When no specific commodity is requested, collect
+                            # any state-matched market so the fallback returns
+                            # real mandi names for the farmer's state.
+                            state_records.append(record_entry)
             except Exception as exc:
                 print(f"[LOG] Error reading fallback '{fn}': {exc}")
             if len(comm_records) >= 30:
@@ -418,11 +424,15 @@ class PlannerAgent:
             lon = m_info.get("longitude")
 
             if lat is None or lon is None:
-                lat, lon = self._get_mandi_coordinates(
-                    market_name=m_info["market_name"],
-                    state=m_info["state"],
-                    district=m_info["district"],
-                )
+                try:
+                    lat, lon = self._get_mandi_coordinates(
+                        market_name=m_info["market_name"],
+                        state=m_info["state"],
+                        district=m_info["district"],
+                    )
+                except (RuntimeError, Exception) as geo_err:
+                    print(f"[LOG] Skipping market '{m_info['market_name']}' — geocoding failed: {geo_err}")
+                    continue
 
             dist_km = haversine_distance(farmer_lat, farmer_lon, lat, lon)
 
@@ -572,7 +582,10 @@ class PlannerAgent:
         Returns:
             Dict containing 'distance_km', 'duration_mins', and routing status.
         """
-        osrm_url = f"http://router.project-osrm.org/route/v1/driving/{lon1},{lat1};{lon2},{lat2}?overview=false"
+        osrm_url = (
+            f"http://router.project-osrm.org/route/v1/driving/{lon1},{lat1};{lon2},{lat2}"
+            f"?overview=full&geometries=geojson"
+        )
         try:
             response = requests.get(osrm_url, timeout=5)
             if response.status_code == 200:
@@ -582,10 +595,21 @@ class PlannerAgent:
                     route = routes[0]
                     dist_meters = float(route.get("distance", 0.0))
                     dur_seconds = float(route.get("duration", 0.0))
+                    raw_coords = route.get("geometry", {}).get("coordinates", [])
+                    if raw_coords:
+                        step = max(1, len(raw_coords) // 120)
+                        sampled = raw_coords[::step]
+                        if raw_coords[-1] != sampled[-1]:
+                            sampled.append(raw_coords[-1])
+                        geometry = [[round(pt[1], 5), round(pt[0], 5)] for pt in sampled]
+                    else:
+                        geometry = [[round(lat1, 5), round(lon1, 5)], [round(lat2, 5), round(lon2, 5)]]
+
                     return {
                         "distance_km": round(dist_meters / 1000.0, 2),
                         "duration_mins": round(dur_seconds / 60.0, 1),
                         "is_osrm": True,
+                        "geometry": geometry,
                     }
         except Exception as exc:
             print(f"[LOG] OSRM routing failed ({exc}). Using Haversine * 1.3 fallback.")
@@ -599,6 +623,7 @@ class PlannerAgent:
             "distance_km": round(road_dist_km, 2),
             "duration_mins": round(est_duration_mins, 1),
             "is_osrm": False,
+            "geometry": [[round(lat1, 5), round(lon1, 5)], [round(lat2, 5), round(lon2, 5)]],
         }
 
     def _get_live_diesel_price(self, state: str = "Maharashtra") -> float:
@@ -718,6 +743,7 @@ class PlannerAgent:
             )
             dist_km = route_info["distance_km"]
             dur_mins = route_info["duration_mins"]
+            route_geom = route_info.get("geometry", [])
             round_trip_dist = dist_km * 2.0
 
             # Calculate detailed transport cost
@@ -749,6 +775,7 @@ class PlannerAgent:
                     "mandi_coordinates": (mandi_lat, mandi_lon),
                     "one_way_distance_km": dist_km,
                     "driving_duration_mins": dur_mins,
+                    "route_geometry": route_geom,
                     "round_trip_distance_km": round(round_trip_dist, 2),
                     "truck_type": truck_spec["truck_type"],
                     "vehicle_assigned": truck_spec["truck_type"],

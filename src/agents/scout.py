@@ -143,7 +143,7 @@ class ScoutAgent:
         params = {
             "latitude": latitude,
             "longitude": longitude,
-            "current_weather": "true",
+            "current": "temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m",
         }
 
         try:
@@ -153,16 +153,24 @@ class ScoutAgent:
             response.raise_for_status()
             data = response.json()
 
-            current = data.get("current_weather")
+            current = data.get("current") or data.get("current_weather")
             if not current:
-                raise ValueError("Response missing 'current_weather' payload.")
+                raise ValueError("Response missing 'current' weather payload.")
+
+            temp = current.get("temperature_2m") if "temperature_2m" in current else current.get("temperature")
+            wind = current.get("wind_speed_10m") if "wind_speed_10m" in current else current.get("windspeed")
+            wcode = current.get("weather_code") if "weather_code" in current else current.get("weathercode", 0)
+            humidity = current.get("relative_humidity_2m", 50.0)
+            precip = current.get("precipitation", 0.0)
 
             return {
                 "latitude": data.get("latitude", latitude),
                 "longitude": data.get("longitude", longitude),
-                "temperature": current.get("temperature"),
-                "windspeed": current.get("windspeed"),
-                "weathercode": current.get("weathercode"),
+                "temperature": float(temp) if temp is not None else 28.0,
+                "humidity": float(humidity) if humidity is not None else 50.0,
+                "precipitation": float(precip) if precip is not None else 0.0,
+                "windspeed": float(wind) if wind is not None else 10.0,
+                "weathercode": int(wcode) if wcode is not None else 0,
                 "time": current.get("time"),
             }
 
@@ -178,6 +186,140 @@ class ScoutAgent:
             raise RuntimeError(
                 f"Error parsing weather response from Open-Meteo: {exc}"
             ) from exc
+
+    def evaluate_cargo_spoilage_risk(
+        self,
+        weather_data: Dict[str, Any],
+        commodity: str,
+        distance_km: float,
+        duration_mins: float,
+        quantity_quintals: float = 50.0,
+        expected_modal_price: float = 2200.0,
+    ) -> Dict[str, Any]:
+        """Evaluate cargo transit spoilage and damage risk based on real-time weather, commodity sensitivity, and highway duration.
+
+        Args:
+            weather_data: Meteorological telemetry dictionary from fetch_weather.
+            commodity: Harvest commodity name.
+            distance_km: One-way transit highway distance.
+            duration_mins: Highway transit duration in minutes.
+            quantity_quintals: Shipment quantity.
+            expected_modal_price: Projected market price per quintal.
+
+        Returns:
+            Structured risk assessment dictionary with risk level, score, threats, protocols, and loss prevention estimates.
+        """
+        comm_clean = (commodity or "").strip().lower()
+
+        # Categorize perishability classes
+        high_perishables = {
+            "tomato", "green chilli", "brinjal", "cauliflower", "cabbage",
+            "bhindi(ladies finger)", "bhindi", "banana", "apple", "carrot"
+        }
+        semi_perishables = {
+            "onion", "potato"
+        }
+
+        if any(hp in comm_clean for hp in high_perishables):
+            perishability_class = "High Perishable"
+            risk_base = 35
+        elif any(sp in comm_clean for sp in semi_perishables):
+            perishability_class = "Semi-Perishable (Moisture-Sensitive)"
+            risk_base = 20
+        else:
+            perishability_class = "Durable Grain & Fiber"
+            risk_base = 10
+
+        temp = float(weather_data.get("temperature") or 28.0)
+        humidity = float(weather_data.get("humidity") or 50.0)
+        precip = float(weather_data.get("precipitation") or 0.0)
+        wcode = int(weather_data.get("weathercode") or 0)
+        dur_hours = max(0.5, float(duration_mins or 60.0) / 60.0)
+
+        # Weather threshold flags
+        is_raining = precip > 0.2 or (51 <= wcode <= 67) or (80 <= wcode <= 82) or (95 <= wcode <= 99)
+        is_heavy_rain = precip > 5.0 or (63 <= wcode <= 65) or (wcode >= 95)
+        is_high_heat = temp >= 34.0
+        is_extreme_heat = temp >= 38.0
+        is_high_humidity = humidity >= 70.0
+
+        risk_score = risk_base
+
+        if is_heavy_rain:
+            risk_score += 45
+        elif is_raining:
+            risk_score += 30
+
+        if is_extreme_heat:
+            risk_score += 25 if perishability_class == "High Perishable" else 15
+        elif is_high_heat:
+            risk_score += 15 if perishability_class == "High Perishable" else 8
+
+        if dur_hours > 6.0:
+            risk_score += 15 if perishability_class != "Durable Grain & Fiber" else 5
+        elif dur_hours > 3.0:
+            risk_score += 8 if perishability_class != "Durable Grain & Fiber" else 2
+
+        if is_high_humidity and is_high_heat:
+            risk_score += 10
+
+        risk_score = min(98, max(5, risk_score))
+
+        if risk_score >= 60:
+            risk_level = "HIGH"
+            badge_color = "rose"
+        elif risk_score >= 35:
+            risk_level = "MODERATE"
+            badge_color = "amber"
+        else:
+            risk_level = "LOW"
+            badge_color = "emerald"
+
+        primary_threats = []
+        action_protocols = []
+
+        if is_raining or is_heavy_rain:
+            primary_threats.append(f"Precipitation & Road Spray ({precip:.1f} mm rain)")
+            action_protocols.append("Mandatory: Double-layer 250+ GSM waterproof tarpaulin with sealed side lashing to prevent water pooling.")
+        if is_high_heat:
+            primary_threats.append(f"Solar Thermal Stress ({temp:.1f}°C ambient)")
+            if perishability_class == "High Perishable":
+                action_protocols.append("Recommended: Night or pre-dawn dispatch (6:00 PM – 4:00 AM) to avoid midday heat softening.")
+            else:
+                action_protocols.append("Ensure breathable top mesh or side ventilation to prevent hot air entrapment.")
+        if is_high_humidity and not is_raining:
+            primary_threats.append(f"High Relative Humidity ({humidity:.0f}%)")
+            action_protocols.append("Elevate bottom sacks on wooden crates/dunnage to avoid condensation decay.")
+
+        if not primary_threats:
+            primary_threats.append("None (Clear & Stable Weather)")
+            action_protocols.append("Standard covered transport; highway weather is optimal for direct transit.")
+
+        loss_pct = 0.18 if risk_level == "HIGH" else (0.08 if risk_level == "MODERATE" else 0.02)
+        distress_loss_prevented = round(quantity_quintals * expected_modal_price * loss_pct)
+
+        return {
+            "risk_level": risk_level,
+            "risk_score": risk_score,
+            "badge_color": badge_color,
+            "perishability_class": perishability_class,
+            "ambient_temperature": round(temp, 1),
+            "relative_humidity": round(humidity, 0),
+            "precipitation_mm": round(precip, 1),
+            "transit_duration_hours": round(dur_hours, 1),
+            "is_raining": is_raining,
+            "primary_threat": " + ".join(primary_threats),
+            "action_protocols": action_protocols,
+            "optimal_dispatch_window": (
+                "Night / Dawn (6:00 PM – 4:00 AM)" if (is_high_heat and perishability_class != "Durable Grain & Fiber") 
+                else "Immediate Dispatch Favorable"
+            ),
+            "recommended_tarpaulin": (
+                "Heavy-Duty 250+ GSM Waterproof Tarpaulin (Double-Tied)" if is_raining
+                else ("Breathable Ventilated Tarpaulin / Crate Spacers" if is_high_heat else "Standard Cargo Cover")
+            ),
+            "distress_loss_prevented_inr": distress_loss_prevented,
+        }
 
     def fetch_live_mandi_prices(
         self, state: str, commodity: str, timeout: int = 5

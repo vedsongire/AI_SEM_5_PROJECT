@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="dark scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +10,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@500;600;700;800;900&display=swap" rel="stylesheet">
     
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Leaflet CSS & JS for Interactive Highway Route Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -57,22 +64,22 @@
             font-family: 'Poppins', sans-serif;
         }
 
-        /* Glassmorphism Panel Tokens */
+        /* Glassmorphism Panel Tokens - Defaulting to Dark Glass */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.90);
+            background: rgba(15, 23, 42, 0.88);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-            color: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+            color: #f8fafc;
             transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .dark .glass-panel {
-            background: rgba(15, 23, 42, 0.88);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             color: #f8fafc;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.55);
         }
 
         .glass-nav {
@@ -139,6 +146,45 @@
         .ticker-track:hover {
             animation-play-state: paused;
         }
+
+        /* Leaflet Custom Map Styling */
+        .custom-map-icon {
+            background: transparent;
+            border: none;
+        }
+        .leaflet-popup-content-wrapper {
+            background: rgba(15, 23, 42, 0.95) !important;
+            backdrop-filter: blur(14px);
+            color: #f8fafc !important;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            border-radius: 16px !important;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.5) !important;
+        }
+        .leaflet-popup-tip {
+            background: rgba(15, 23, 42, 0.95) !important;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+        .leaflet-container {
+            font-family: 'Inter', sans-serif !important;
+        }
+        .leaflet-control-layers {
+            background: rgba(15, 23, 42, 0.92) !important;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            border-radius: 12px !important;
+            color: #f8fafc !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4) !important;
+            padding: 8px 12px !important;
+            font-size: 11px !important;
+            font-weight: 600 !important;
+        }
+        .leaflet-control-layers-base label {
+            cursor: pointer;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
     </style>
 </head>
 <body class="antialiased selection:bg-emerald-500 selection:text-white">
@@ -148,7 +194,7 @@
     <!-- ------------------------------------------------------------------- -->
     <header class="sticky top-0 z-40 glass-nav px-6 py-4 shadow-lg">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <a href="/" class="flex items-center space-x-3 group cursor-pointer" title="Return to Landing Page">
+            <a href="/" class="flex items-center space-x-3 group cursor-pointer" title="K.I.S.A.N. AI Dashboard">
                 <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-emerald-700 to-emerald-400 flex items-center justify-center text-white text-2xl shadow-lg shadow-emerald-500/30 group-hover:scale-105 transition-transform">
                     🌾
                 </div>
@@ -170,15 +216,6 @@
                     <i class="fa-solid fa-language text-amber-400 text-sm"></i>
                     <span id="dashLangLabel">🇮🇳 हिंदी | EN</span>
                 </button>
-
-                <a 
-                    href="/" 
-                    class="hidden md:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 border border-slate-700 transition-all"
-                    title="Go to Landing Page"
-                >
-                    <i class="fa-solid fa-arrow-left text-[10px]"></i>
-                    <span data-i18n-dash="nav_home">मुख्य पृष्ठ (Home)</span>
-                </a>
                 <button 
                     type="button"
                     onclick="toggleFarmerChatbot(true)" 
@@ -568,6 +605,170 @@
                 </div>
             </div>
 
+            <!-- ROW 2B: INTERACTIVE SHIPMENT ROUTE MAP & GPS NAVIGATION -->
+            <div class="glass-panel rounded-3xl p-6 sm:p-8 border border-emerald-500/40 shadow-2xl relative overflow-hidden space-y-5 bg-slate-900/90 backdrop-blur-xl">
+                <!-- Header -->
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-700/60">
+                    <div class="flex items-center space-x-3.5">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-emerald-400 text-white flex items-center justify-center text-2xl shadow-lg shadow-emerald-500/30">
+                            🗺️
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-xl sm:text-2xl font-black text-white tracking-tight">Live Highway Transit Route Map</h3>
+                                <span id="mapRouteBadge" class="text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                                    Golden Route #1
+                                </span>
+                            </div>
+                            <p class="text-xs sm:text-sm text-slate-300">
+                                Real-time highway dispatch route connecting your farm to the highest-profit APMC mandi
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Action Controls -->
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <!-- Quick Route Switcher Tabs -->
+                        <div class="inline-flex rounded-xl bg-slate-900/90 p-1 border border-slate-700/80 text-xs font-bold" id="mapRouteSelectorGroup">
+                            <button type="button" onclick="selectMapRoute(0)" id="mapBtnRoute0" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 text-white shadow-sm transition font-black cursor-pointer">
+                                🏆 Rank 1
+                            </button>
+                            <button type="button" onclick="selectMapRoute(1)" id="mapBtnRoute1" class="px-3.5 py-1.5 rounded-lg text-slate-300 hover:text-white transition font-semibold cursor-pointer">
+                                🥈 Rank 2
+                            </button>
+                            <button type="button" onclick="selectMapRoute(2)" id="mapBtnRoute2" class="px-3.5 py-1.5 rounded-lg text-slate-300 hover:text-white transition font-semibold cursor-pointer">
+                                🥉 Rank 3
+                            </button>
+                        </div>
+
+                        <!-- 1-Click Google Maps Turn-by-Turn GPS Button -->
+                        <a 
+                            id="googleMapsNavBtn" 
+                            href="#" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            class="inline-flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-500/25 border border-blue-400/40 transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
+                            title="Open Google Maps for live turn-by-turn driving directions"
+                        >
+                            <span>🗺️</span>
+                            <span>Open in Google Maps</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Route Distance & Time Banner -->
+                <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-slate-950/70 border border-slate-800 text-xs">
+                    <div class="flex items-center gap-2 text-slate-300">
+                        <span class="text-emerald-400 font-bold">🛣️ Highway Path:</span>
+                        <span id="mapRouteSummaryText" class="font-bold text-white text-sm">-- ➔ --</span>
+                    </div>
+                    <div class="flex items-center gap-4 text-slate-300">
+                        <div>One-Way Distance: <strong id="mapRouteDistanceText" class="text-emerald-400 font-bold text-sm">-- km</strong></div>
+                        <div class="h-3 w-px bg-slate-700"></div>
+                        <div>Estimated Driving Time: <strong id="mapRouteDurationText" class="text-amber-400 font-bold text-sm">-- hrs</strong></div>
+                    </div>
+                </div>
+
+                <!-- Leaflet Canvas & Legend Container -->
+                <div class="relative rounded-2xl overflow-hidden border border-slate-700/80 shadow-2xl">
+                    <div id="shipmentRouteMap" class="w-full h-80 sm:h-[440px] bg-slate-900 z-0"></div>
+                    
+                    <!-- Floating Map Legend -->
+                    <div class="absolute bottom-3 left-3 z-[400] bg-slate-950/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-700/80 text-xs text-slate-300 shadow-2xl flex flex-wrap items-center gap-3">
+                        <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-emerald-500 inline-block shadow-sm"></span> 🌾 Farm</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-amber-400 inline-block shadow-sm"></span> 🏆 Golden APMC</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-sky-400 inline-block shadow-sm"></span> 🏢 Other Mandis</span>
+                        <span class="hidden sm:flex items-center gap-1.5"><span class="w-5 h-1.5 bg-emerald-400 inline-block rounded shadow-sm"></span> Highway Route</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROW 2C: TRANSIT WEATHER & CARGO SPOILAGE RISK ADVISORY (SCOUT AGENT) -->
+            <div class="glass-panel rounded-3xl p-6 sm:p-8 border border-sky-500/40 shadow-2xl relative overflow-hidden space-y-6 bg-slate-900/90 backdrop-blur-xl">
+                <!-- Header -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-700/60">
+                    <div class="flex items-center space-x-3.5">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-600 to-cyan-400 text-white flex items-center justify-center text-2xl shadow-lg shadow-sky-500/30">
+                            🌦️
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-xl sm:text-2xl font-black text-white tracking-tight">Cargo Transit & Spoilage Advisory</h3>
+                                <span class="text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/40">
+                                    ScoutAgent Live
+                                </span>
+                            </div>
+                            <p class="text-xs sm:text-sm text-slate-300">
+                                Meteorological risk modeling to prevent post-harvest cargo decay and middleman distress deductions
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Risk Gauge Badge -->
+                    <div id="spoilageRiskBadge" class="inline-flex items-center space-x-2 px-4 py-2 rounded-2xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-black uppercase tracking-wider shadow-md">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span id="spoilageRiskLevelText">LOW TRANSIT RISK (Score: 20/100)</span>
+                    </div>
+                </div>
+
+                <!-- 4 Live Telemetry Metric Tiles -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div class="p-4 rounded-2xl bg-slate-950/75 border border-slate-800/90 space-y-1">
+                        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">🌡️ Ambient Temp</div>
+                        <div class="text-xl sm:text-2xl font-black text-white" id="weatherTemp">--°C</div>
+                        <div class="text-[10px] text-slate-400 font-medium" id="weatherTempStatus">Highway corridor temp</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-slate-950/75 border border-slate-800/90 space-y-1">
+                        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">💧 Relative Humidity</div>
+                        <div class="text-xl sm:text-2xl font-black text-white" id="weatherHumidity">--%</div>
+                        <div class="text-[10px] text-slate-400 font-medium" id="weatherHumidityStatus">Air moisture level</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-slate-950/75 border border-slate-800/90 space-y-1">
+                        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">🌧️ Live Rain Radar</div>
+                        <div class="text-xl sm:text-2xl font-black text-white" id="weatherPrecip">0.0 mm</div>
+                        <div class="text-[10px] text-slate-400 font-medium" id="weatherPrecipStatus">Precipitation index</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-slate-950/75 border border-slate-800/90 space-y-1">
+                        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">⏳ Road Exposure</div>
+                        <div class="text-xl sm:text-2xl font-black text-white" id="weatherDuration">-- hrs</div>
+                        <div class="text-[10px] text-slate-400 font-medium" id="weatherDurationStatus">Transit exposure window</div>
+                    </div>
+                </div>
+
+                <!-- Actionable Cargo Protocols (2 Columns) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-1">
+                    <!-- Column A: Packaging & Tarpaulin Protocol -->
+                    <div class="p-5 rounded-2xl bg-slate-950/75 border border-slate-800/90 space-y-3">
+                        <div class="flex items-center space-x-2.5 text-amber-400 font-bold text-sm">
+                            <span class="text-base">🛡️</span>
+                            <span class="uppercase tracking-wider text-xs">Recommended Tarpaulin / Coverage</span>
+                        </div>
+                        <div class="text-base font-extrabold text-white" id="weatherTarpSpec">
+                            Standard Protective Cargo Cover
+                        </div>
+                        <div class="text-xs text-slate-300 leading-relaxed font-medium" id="weatherTarpProtocol">
+                            Standard covered transport; highway weather is optimal for direct transit.
+                        </div>
+                    </div>
+
+                    <!-- Column B: Optimal Timing & Distress Loss Protection -->
+                    <div class="p-5 rounded-2xl bg-slate-950/75 border border-slate-800/90 space-y-3">
+                        <div class="flex items-center space-x-2.5 text-emerald-400 font-bold text-sm">
+                            <span class="text-base">🕒</span>
+                            <span class="uppercase tracking-wider text-xs">Optimal Dispatch Window</span>
+                        </div>
+                        <div class="text-base font-extrabold text-white" id="weatherDispatchWindow">
+                            Immediate Dispatch Favorable
+                        </div>
+                        <div class="flex items-center justify-between pt-1 border-t border-slate-800 text-xs">
+                            <span class="text-slate-400">Potential Distress Loss Prevented:</span>
+                            <span class="text-emerald-400 font-black text-sm" id="weatherLossPrevented">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- ROW 3: COMPARISON GRID -->
             <div>
                 <h3 class="text-xl font-bold text-white mb-6">Market Comparison Grid (Top 3 Regional APMCs)</h3>
@@ -875,6 +1076,49 @@
                 grid.appendChild(card);
             });
 
+            // Update Weather & Spoilage Advisory (ROW 2C)
+            const adv = data.weather_advisory;
+            if (adv) {
+                const tempEl = document.getElementById('weatherTemp');
+                if (tempEl) tempEl.innerText = `${adv.ambient_temperature}°C`;
+
+                const humEl = document.getElementById('weatherHumidity');
+                if (humEl) humEl.innerText = `${adv.relative_humidity}%`;
+
+                const precipEl = document.getElementById('weatherPrecip');
+                if (precipEl) precipEl.innerText = `${adv.precipitation_mm} mm`;
+
+                const durEl = document.getElementById('weatherDuration');
+                if (durEl) durEl.innerText = `~${adv.transit_duration_hours} hrs`;
+
+                const riskBadge = document.getElementById('spoilageRiskBadge');
+                const riskText = document.getElementById('spoilageRiskLevelText');
+                if (riskBadge && riskText) {
+                    riskText.innerText = `${adv.risk_level} TRANSIT RISK (Score: ${adv.risk_score}/100)`;
+                    if (adv.risk_level === 'HIGH') {
+                        riskBadge.className = "inline-flex items-center space-x-2 px-4 py-2 rounded-2xl bg-rose-500/20 text-rose-300 border border-rose-500/40 text-xs font-black uppercase tracking-wider shadow-md";
+                    } else if (adv.risk_level === 'MODERATE') {
+                        riskBadge.className = "inline-flex items-center space-x-2 px-4 py-2 rounded-2xl bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-black uppercase tracking-wider shadow-md";
+                    } else {
+                        riskBadge.className = "inline-flex items-center space-x-2 px-4 py-2 rounded-2xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-black uppercase tracking-wider shadow-md";
+                    }
+                }
+
+                const tarpSpecEl = document.getElementById('weatherTarpSpec');
+                if (tarpSpecEl) tarpSpecEl.innerText = adv.recommended_tarpaulin;
+
+                const tarpProtEl = document.getElementById('weatherTarpProtocol');
+                if (tarpProtEl && adv.action_protocols) {
+                    tarpProtEl.innerText = adv.action_protocols.join(' ');
+                }
+
+                const dispatchEl = document.getElementById('weatherDispatchWindow');
+                if (dispatchEl) dispatchEl.innerText = adv.optimal_dispatch_window;
+
+                const lossEl = document.getElementById('weatherLossPrevented');
+                if (lossEl) lossEl.innerText = `₹${adv.distress_loss_prevented_inr.toLocaleString()}`;
+            }
+
             // Reveal Results Section with smooth animation & scroll
             const placeholder = document.getElementById('placeholderState');
             const resultsSec = document.getElementById('resultsSection');
@@ -882,7 +1126,256 @@
             if (placeholder) placeholder.classList.add('hidden');
             resultsSec.classList.remove('hidden');
 
+            // Initialize or Update Interactive Route Map
+            initOrUpdateShipmentMap(data);
+
             resultsSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // =====================================================================
+        // INTERACTIVE HIGHWAY SHIPMENT ROUTE MAP LOGIC (LEAFLET + OSRM)
+        // =====================================================================
+        let shipmentMap = null;
+        let currentMapData = null;
+        let activeRoutePolyline = null;
+        let mapMarkersLayer = null;
+
+        function formatDuration(mins) {
+            if (!mins || mins <= 0) return "--";
+            const h = Math.floor(mins / 60);
+            const m = Math.round(mins % 60);
+            if (h === 0) return `${m} mins`;
+            if (m === 0) return `${h} hrs`;
+            return `${h} hrs ${m} mins`;
+        }
+
+        function initOrUpdateShipmentMap(data) {
+            currentMapData = data;
+            const mapContainer = document.getElementById('shipmentRouteMap');
+            if (!mapContainer || !window.L) return;
+
+            const farmerCoords = [data.resolved_coords.lat, data.resolved_coords.lon];
+            const heroWinner = data.hero_winner;
+            const markets = data.comparison_markets || [];
+
+            // Initialize Leaflet map if not already created
+            if (!shipmentMap) {
+                shipmentMap = L.map('shipmentRouteMap', {
+                    zoomControl: true,
+                    scrollWheelZoom: false
+                }).setView(farmerCoords, 8);
+
+                // Standard OpenStreetMap Tiles (100% Free, Zero API Key Required)
+                const osmLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                });
+
+                // High-detail Esri Highway GIS Layer (No API Key Required)
+                const esriLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+                    maxZoom: 19,
+                    attribution: 'Tiles &copy; Esri'
+                });
+
+                // Add OpenStreetMap by default
+                osmLayer.addTo(shipmentMap);
+
+                // Add clean layer switcher control
+                L.control.layers({
+                    "🗺️ OpenStreetMap": osmLayer,
+                    "🛣️ Highway GIS": esriLayer
+                }, null, { position: 'topright' }).addTo(shipmentMap);
+
+                mapMarkersLayer = L.layerGroup().addTo(shipmentMap);
+            } else {
+                mapMarkersLayer.clearLayers();
+                if (activeRoutePolyline) {
+                    shipmentMap.removeLayer(activeRoutePolyline);
+                    activeRoutePolyline = null;
+                }
+            }
+
+            // Invalidate size to guarantee crisp rendering inside dynamically shown container
+            setTimeout(() => {
+                if (shipmentMap) shipmentMap.invalidateSize();
+            }, 300);
+
+            // 1. Add Farmer Origin Marker
+            const farmIcon = L.divIcon({
+                className: 'custom-map-icon',
+                html: `
+                    <div class="relative group cursor-pointer">
+                        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-700 to-emerald-500 border-2 border-white shadow-2xl flex items-center justify-center text-xl transform hover:scale-110 transition-transform">
+                            🌾
+                        </div>
+                        <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-emerald-600 rotate-45"></div>
+                    </div>
+                `,
+                iconSize: [40, 44],
+                iconAnchor: [20, 44],
+                popupAnchor: [0, -44]
+            });
+
+            const farmMarker = L.marker(farmerCoords, { icon: farmIcon })
+                .bindPopup(`
+                    <div class="p-2 space-y-1 text-xs">
+                        <div class="font-black text-emerald-400 text-sm flex items-center gap-1.5">
+                            <span>🌾</span> <span>Farmer Dispatch Origin</span>
+                        </div>
+                        <div class="text-white font-bold text-sm">${data.location}</div>
+                        <div class="text-slate-300">Produce: <strong>${data.quantity} Quintals ${data.crop}</strong></div>
+                        <div class="text-slate-400 font-mono text-[10px]">Lat: ${farmerCoords[0]}°, Lon: ${farmerCoords[1]}°</div>
+                    </div>
+                `);
+            mapMarkersLayer.addLayer(farmMarker);
+
+            // 2. Add Candidate Mandi Markers (Hero Winner + Alternatives)
+            markets.forEach((m, idx) => {
+                if (!m.coordinates || !m.coordinates.lat || !m.coordinates.lon) return;
+                const mCoords = [m.coordinates.lat, m.coordinates.lon];
+                const isWinner = (idx === 0);
+
+                const mandiIcon = L.divIcon({
+                    className: 'custom-map-icon',
+                    html: `
+                        <div class="relative group cursor-pointer">
+                            <div class="w-10 h-10 rounded-2xl ${isWinner ? 'bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-400 ring-4 ring-amber-400/40' : 'bg-slate-800 border-2 border-sky-400'} border-2 border-white shadow-2xl flex items-center justify-center text-lg font-black text-white transform hover:scale-110 transition-transform">
+                                ${isWinner ? '🏆' : '#' + m.rank}
+                            </div>
+                            <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 ${isWinner ? 'bg-amber-500' : 'bg-slate-800'} rotate-45"></div>
+                        </div>
+                    `,
+                    iconSize: [40, 44],
+                    iconAnchor: [20, 44],
+                    popupAnchor: [0, -44]
+                });
+
+                const gmapsLink = m.google_maps_url || heroWinner.google_maps_url;
+
+                const mandiMarker = L.marker(mCoords, { icon: mandiIcon })
+                    .bindPopup(`
+                        <div class="p-2.5 space-y-1.5 text-xs min-w-[210px]">
+                            <div class="flex items-center justify-between pb-1 border-b border-slate-700/60">
+                                <span class="font-black ${isWinner ? 'text-amber-400' : 'text-sky-400'} text-xs uppercase">
+                                    ${isWinner ? '🏆 Rank #1 Golden Route' : 'Rank #' + m.rank + ' Alternative'}
+                                </span>
+                                <span class="text-slate-400 text-[10px]">${m.distance_km} km</span>
+                            </div>
+                            <div class="text-white font-extrabold text-sm">${m.market_name}</div>
+                            <div class="text-slate-300 text-[11px]">${m.district} District</div>
+                            <div class="flex justify-between items-center py-1 bg-slate-900/80 px-2 rounded-lg border border-slate-800">
+                                <span class="text-slate-400">Net Profit:</span>
+                                <span class="font-black text-emerald-400 text-sm">₹${m.net_profit.toLocaleString()}</span>
+                            </div>
+                            <div class="pt-1">
+                                <a href="${gmapsLink}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-[11px] text-blue-400 hover:text-blue-300 font-bold">
+                                    <span>🗺️ Navigate via Google Maps</span>
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                                </a>
+                            </div>
+                        </div>
+                    `);
+                mapMarkersLayer.addLayer(mandiMarker);
+            });
+
+            // 3. Render Route #1 by default
+            selectMapRoute(0);
+        }
+
+        function selectMapRoute(routeIdx) {
+            if (!currentMapData || !shipmentMap) return;
+            const markets = currentMapData.comparison_markets || [];
+            if (!markets[routeIdx]) return;
+
+            const targetMarket = markets[routeIdx];
+            const farmerCoords = [currentMapData.resolved_coords.lat, currentMapData.resolved_coords.lon];
+            const mandiCoords = [targetMarket.coordinates.lat, targetMarket.coordinates.lon];
+
+            // Update Tab Button Styles
+            [0, 1, 2].forEach(i => {
+                const btn = document.getElementById(`mapBtnRoute${i}`);
+                if (!btn) return;
+                if (i === routeIdx) {
+                    btn.className = "px-3.5 py-1.5 rounded-lg bg-emerald-600 text-white shadow-sm transition font-black cursor-pointer";
+                } else {
+                    btn.className = "px-3.5 py-1.5 rounded-lg text-slate-300 hover:text-white transition font-semibold cursor-pointer";
+                }
+            });
+
+            // Update Route Summary Text & Badge
+            const badgeEl = document.getElementById('mapRouteBadge');
+            if (badgeEl) {
+                badgeEl.innerText = routeIdx === 0 ? "Golden Route #1" : `Candidate Route #${routeIdx + 1}`;
+                badgeEl.className = routeIdx === 0 
+                    ? "text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                    : "text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700";
+            }
+
+            const summaryEl = document.getElementById('mapRouteSummaryText');
+            if (summaryEl) {
+                summaryEl.innerText = `${currentMapData.resolved_coords.district || currentMapData.location} ➔ ${targetMarket.market_name}`;
+            }
+
+            const distEl = document.getElementById('mapRouteDistanceText');
+            if (distEl) {
+                distEl.innerText = `${targetMarket.distance_km} km`;
+            }
+
+            const durEl = document.getElementById('mapRouteDurationText');
+            if (durEl) {
+                durEl.innerText = formatDuration(targetMarket.driving_duration_mins);
+            }
+
+            // Update Google Maps Link Button
+            const gmapsBtn = document.getElementById('googleMapsNavBtn');
+            if (gmapsBtn && targetMarket.google_maps_url) {
+                gmapsBtn.href = targetMarket.google_maps_url;
+            }
+
+            // Remove previous polyline
+            if (activeRoutePolyline) {
+                shipmentMap.removeLayer(activeRoutePolyline);
+                activeRoutePolyline = null;
+            }
+
+            // Use actual OSRM geometry if present, or fallback straight line
+            let polylineCoords = targetMarket.route_geometry;
+            if (!polylineCoords || polylineCoords.length < 2) {
+                polylineCoords = [farmerCoords, mandiCoords];
+            }
+
+            // Draw glowing route polyline
+            const routeColor = (routeIdx === 0) ? '#10b981' : '#38bdf8'; // Emerald for Winner, Sky Blue for alternates
+
+            // Outer glow line
+            const glowLine = L.polyline(polylineCoords, {
+                color: routeColor,
+                weight: 8,
+                opacity: 0.35,
+                lineCap: 'round',
+                lineJoin: 'round'
+            });
+
+            // Core highway line
+            const coreLine = L.polyline(polylineCoords, {
+                color: routeColor,
+                weight: 4,
+                opacity: 0.95,
+                lineCap: 'round',
+                lineJoin: 'round',
+                dashArray: (routeIdx === 0) ? null : '6, 6'
+            });
+
+            activeRoutePolyline = L.layerGroup([glowLine, coreLine]).addTo(shipmentMap);
+
+            // Smoothly zoom & fit map bounds with padding
+            try {
+                const bounds = L.latLngBounds([farmerCoords, mandiCoords]);
+                polylineCoords.forEach(pt => bounds.extend(pt));
+                shipmentMap.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 });
+            } catch (e) {
+                console.log("Could not fit bounds", e);
+            }
         }
 
         // =====================================================================
