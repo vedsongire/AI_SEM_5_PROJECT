@@ -344,7 +344,7 @@ class VoiceAgent:
             "please", "tell", "me", "show", "give", "of", "and", "from", "i", "want", "have", "my", "which",
             "where", "can", "how", "much", "good", "better", "produce", "crop", "harvest",
             "hello", "hi", "namaste", "weather", "rain", "clouds", "cloudy", "temperature",
-            "नमस्ते", "प्रणाम", "राम", "राम राम", "सत श्री अकाल", "मौसम", "बारिश", "तापमान", "बादल", "कैसा", "कैसी",
+            "नमस्ते", "प्रणाम", "राम राम", "सत श्री अकाल", "मौसम", "बारिश", "तापमान", "बादल", "कैसा", "कैसी",
             "किसान", "भाई", "का", "की", "के", "लिए", "सबसे", "अच्छी", "मंडी", "भाव", "क्या", "है",
             "बताओ", "बताइए", "चाहिए", "बेचना", "में", "से", "यहाँ", "नजदीकी", "लाभ", "खर्च", "कृपया",
             "जानकारी", "दे", "दो", "कितना", "मिलेगा", "दर", "दाम", "आज", "मुझे", "मैं", "हम", "मेरा",
@@ -592,7 +592,33 @@ class VoiceAgent:
         location = parsed.get("location")
         is_hindi = parsed.get("is_hindi", True) or "hi" in language
 
-        # Step 3: Multi-agent execution
+        # Step 3: Missing Information Check
+        if not location or quantity is None:
+            if is_hindi:
+                spoken_text = "कृपया अपना स्थान और फसल की मात्रा बताएं।"
+                markdown_text = "📍 **जानकारी अधूरी है**\nकृपया अपना स्थान (जैसे: जालना) और फसल की मात्रा (जैसे: 50 क्विंटल) बताएं।"
+            else:
+                spoken_text = "Please provide your location and crop quantity."
+                markdown_text = "📍 **Missing Information**\nPlease provide your location (e.g., Jalna) and the crop quantity (e.g., 50 quintals)."
+            
+            tts_res = self.synthesize_speech(spoken_text, language="hi" if is_hindi else "en")
+            return {
+                "status": "success",
+                "transcript": query_text,
+                "intent": parsed.get("intent", "UNKNOWN"),
+                "entities": {
+                    "commodity": commodity,
+                    "quantity_quintals": quantity,
+                    "location": location,
+                },
+                "response_text": spoken_text,
+                "reply_markdown": markdown_text,
+                "audio_bytes": tts_res.get("audio_bytes", b""),
+                "audio_url": tts_res.get("audio_url", ""),
+                "recommendation": None,
+            }
+
+        # Step 4: Multi-agent execution
         try:
             pipeline_data = self.execute_arbitrage_pipeline(
                 location=location,
@@ -760,8 +786,12 @@ class VoiceAgent:
                     cond = "साफ" if is_hindi else "Clear"
                 elif 1 <= wcode <= 3:
                     cond = "बादल" if is_hindi else "Cloudy"
+                elif wcode in (45, 48):
+                    cond = "कोहरा" if is_hindi else "Fog"
                 elif (51 <= wcode <= 67) or (80 <= wcode <= 82):
                     cond = "बारिश" if is_hindi else "Rain"
+                elif (71 <= wcode <= 77) or (85 <= wcode <= 86):
+                    cond = "बर्फबारी" if is_hindi else "Snow"
                 elif 95 <= wcode <= 99:
                     cond = "तूफान" if is_hindi else "Thunderstorm"
                 else:

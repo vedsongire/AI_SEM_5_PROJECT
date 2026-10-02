@@ -336,15 +336,18 @@ def optimize_api():
 
 import time
 import re
+import threading
 
 CHAT_SESSION_REGISTRY = {}
+CHAT_SESSION_LOCK = threading.Lock()
 SESSION_TTL_SECONDS = 3600
 
 def _clean_expired_sessions():
     now = time.time()
-    expired = [sid for sid, sdata in CHAT_SESSION_REGISTRY.items() if now - sdata.get("last_accessed", 0) > SESSION_TTL_SECONDS]
-    for sid in expired:
-        del CHAT_SESSION_REGISTRY[sid]
+    with CHAT_SESSION_LOCK:
+        expired = [sid for sid, sdata in CHAT_SESSION_REGISTRY.items() if now - sdata.get("last_accessed", 0) > SESSION_TTL_SECONDS]
+        for sid in expired:
+            del CHAT_SESSION_REGISTRY[sid]
 
 @app.route("/api/chat", methods=["POST"])
 def chat_api():
@@ -364,8 +367,9 @@ def chat_api():
 
         _clean_expired_sessions()
 
-        if session_id and not re.match(r"^CHAT_[a-zA-Z0-9]{1,32}$", session_id):
-            return jsonify({"status": "error", "message": "Invalid session ID format."}), 400
+        if session_id:
+            if not isinstance(session_id, str) or not re.match(r"^CHAT_[a-zA-Z0-9]{1,32}$", session_id):
+                return jsonify({"status": "error", "message": "Invalid session ID format."}), 400
 
         # If browser audio bytes were sent, transcribe with speech_recognition
         if audio_b64:
@@ -382,8 +386,9 @@ def chat_api():
         if not user_message:
             return jsonify({"status": "error", "message": "Message is required."}), 400
 
-        session_record = CHAT_SESSION_REGISTRY.get(session_id, {})
-        session_memory = session_record.get("state", {})
+        with CHAT_SESSION_LOCK:
+            session_record = CHAT_SESSION_REGISTRY.get(session_id, {})
+            session_memory = session_record.get("state", {})
 
         # Execute multi-turn conversational chat logic
         chat_res = voice_agent.chat(
@@ -392,10 +397,11 @@ def chat_api():
             language=language,
         )
 
-        CHAT_SESSION_REGISTRY[session_id] = {
-            "state": chat_res.get("session_state", {}),
-            "last_accessed": time.time()
-        }
+        with CHAT_SESSION_LOCK:
+            CHAT_SESSION_REGISTRY[session_id] = {
+                "state": chat_res.get("session_state", {}),
+                "last_accessed": time.time()
+            }
 
         return jsonify({
             "status": "success",
@@ -418,10 +424,12 @@ def chat_reset_api():
     """Reset chatbot session memory for a fresh conversation."""
     data = request.json or {}
     session_id = data.get("session_id")
-    if session_id and not re.match(r"^CHAT_[a-zA-Z0-9]{1,32}$", session_id):
-        return jsonify({"status": "error", "message": "Invalid session ID format."}), 400
-    if session_id and session_id in CHAT_SESSION_REGISTRY:
-        del CHAT_SESSION_REGISTRY[session_id]
+    if session_id:
+        if not isinstance(session_id, str) or not re.match(r"^CHAT_[a-zA-Z0-9]{1,32}$", session_id):
+            return jsonify({"status": "error", "message": "Invalid session ID format."}), 400
+    with CHAT_SESSION_LOCK:
+        if session_id and session_id in CHAT_SESSION_REGISTRY:
+            del CHAT_SESSION_REGISTRY[session_id]
     return jsonify({"status": "success", "message": "Chat session reset successfully."})
 
 
